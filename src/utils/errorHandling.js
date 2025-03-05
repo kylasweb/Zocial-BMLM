@@ -19,7 +19,11 @@ class SystemErrorHandler {
       ['RATE_LIMIT', /rate.*limit|too.*many.*requests/i],
       ['NETWORK', /network.*error|connection.*lost/i],
       ['VALIDATION', /validation.*failed|invalid.*input/i],
-      ['PERMISSION', /permission.*denied|unauthorized|forbidden/i]
+      ['PERMISSION', /permission.*denied|unauthorized|forbidden/i],
+      ['API_ERROR', /api.*error|service.*unavailable/i],
+      ['DATA_INTEGRITY', /data.*integrity|constraint.*violation/i],
+      ['MEMORY', /out.*of.*memory|heap.*size/i],
+      ['TRANSACTION', /transaction.*failed|deadlock/i]
     ]);
   }
 
@@ -85,7 +89,9 @@ class SystemErrorHandler {
       DATABASE_CONNECTION: this.healDatabaseConnection.bind(this),
       AUTHENTICATION: this.healAuthentication.bind(this),
       RATE_LIMIT: this.healRateLimit.bind(this),
-      NETWORK: this.healNetwork.bind(this)
+      NETWORK: this.healNetwork.bind(this),
+      API_ERROR: this.healAPIError.bind(this),
+      MEMORY: this.healMemoryIssue.bind(this)
     };
 
     const healingStrategy = healingStrategies[errorType];
@@ -163,6 +169,20 @@ class SystemErrorHandler {
       message: 'You do not have permission to perform this action.',
       duration: 5000
     }));
+  }
+
+  async healAPIError(error) {
+    return this.retrier.execute(async () => {
+      // Implement API recovery logic
+      await this.checkAPIHealth();
+      await this.reconnectAPI();
+    });
+  }
+
+  async healMemoryIssue(error) {
+    // Implement memory cleanup
+    await this.garbageCollect();
+    await this.clearCache();
   }
 }
 

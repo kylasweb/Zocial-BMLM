@@ -28,5 +28,10 @@ export default {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-duplicate-imports': 'error',
+    'no-async-promise-executor': 'error',
+    'no-await-in-loop': 'warn',
+    'no-promise-executor-return': 'error',
+    'max-nested-callbacks': ['error', 3],
+    'require-atomic-updates': 'error'
   },
 };

@@ -1,24 +1,46 @@
 import * as Sentry from "@sentry/react";
+import { Performance } from "@sentry/react";
 import { securityConfig } from '../config/security.config';
 
 export class MonitoringService {
   static async initializeMonitoring() {
-    // Initialize performance monitoring
-    if (typeof window !== 'undefined') {
-      const { performance, PerformanceObserver } = window;
-      
-      // Monitor web vitals
-      const observer = new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry) => {
-          if (entry.entryType === 'largest-contentful-paint') {
-            console.log('LCP:', entry.startTime);
-            // Send to monitoring service
-          }
-        });
-      });
-      
-      observer.observe({ entryTypes: ['largest-contentful-paint'] });
-    }
+    // Performance monitoring
+    Performance.init({
+      tracesSampleRate: 0.2,
+      profilesSampleRate: 0.1,
+    });
+
+    // Memory leak detection
+    this.startMemoryMonitoring();
+
+    // Health checks
+    this.initializeHealthChecks();
+
+    // Load balancing checks
+    this.monitorLoadBalancing();
+  }
+
+  static startMemoryMonitoring() {
+    setInterval(() => {
+      const used = process.memoryUsage();
+      if (used.heapUsed > 0.8 * used.heapTotal) {
+        Sentry.captureMessage('High memory usage detected', 'warning');
+      }
+    }, 60000);
+  }
+
+  static initializeHealthChecks() {
+    return {
+      '/health': async () => {
+        const checks = await Promise.all([
+          this.checkDatabase(),
+          this.checkCache(),
+          this.checkAPI(),
+          this.checkQueue()
+        ]);
+        return checks.every(check => check.status === 'healthy');
+      }
+    };
   }
 
   static async monitorSmartContract(contractAddress) {

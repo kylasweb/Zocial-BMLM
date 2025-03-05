@@ -1,49 +1,55 @@
-import { useAuth } from '../hooks/useAuth';
-import { useEncryption } from '../hooks/useEncryption';
-import { useAudit } from '../hooks/useAudit';
+import { securityConfig } from '../config/security.config';
+import { rateLimit } from 'express-rate-limit';
+import helmet from 'helmet';
+import cors from 'cors';
 
-export default function SecurityModule() {
-  const { user, validateSession } = useAuth();
-  const { encrypt, decrypt } = useEncryption();
-  const { logActivity } = useAudit();
+export const securityMiddleware = {
+  // Rate limiting
+  rateLimiter: rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests'
+  }),
 
-  return (
-    <div className="security-module">
-      <TwoFactorAuth
-        methods={['authenticator', 'sms', 'email', 'biometric']}
-        backupCodes={true}
-      />
-      <FraudDetection
-        features={{
-          ipTracking: true,
-          deviceFingerprinting: true,
-          behavioralAnalysis: true,
-          transactionMonitoring: true
-        }}
-      />
-      <DataEncryption
-        algorithms={['AES-256', 'RSA-2048']}
-        keyManagement={{
-          rotation: true,
-          backup: true,
-          recovery: true
-        }}
-      />
-      <AccessControl
-        rbac={{
-          roles: ['admin', 'leader', 'member'],
-          permissions: ['read', 'write', 'execute'],
-          hierarchies: true
-        }}
-      />
-      <ComplianceModule
-        features={[
-          'kyc',
-          'aml',
-          'gdpr',
-          'ccpa'
-        ]}
-      />
-    </div>
-  );
-}
+  // CORS configuration
+  cors: cors({
+    origin: process.env.ALLOWED_ORIGINS.split(','),
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  }),
+
+  // Security headers
+  helmet: helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", 'wss:', 'https:']
+      }
+    },
+    crossOriginEmbedderPolicy: true,
+    crossOriginOpenerPolicy: true,
+    crossOriginResourcePolicy: true,
+    dnsPrefetchControl: true,
+    frameguard: true,
+    hidePoweredBy: true,
+    hsts: true,
+    ieNoOpen: true,
+    noSniff: true,
+    permittedCrossDomainPolicies: true,
+    referrerPolicy: true,
+    xssFilter: true
+  }),
+
+  // CSRF protection
+  csrf: {
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    }
+  }
+};

@@ -11,7 +11,25 @@
     "preview": "vite preview",
     "backup": "node scripts/backup.js",
     "audit": "node scripts/audit.js",
-    "monitor": "node scripts/monitor.js"
+    "monitor": "node scripts/monitor.js",
+    "security-check": "npm audit && snyk test",
+    "update-deps": "npm-check-updates -u && npm install",
+    "precommit": "npm run lint && npm run test",
+    "analyze": "source-map-explorer 'dist/**/*.js'",
+    "clean": "rimraf dist node_modules/.cache",
+    
+    // Adding new monitoring and validation scripts
+    "monitoring:setup": "node scripts/monitoring/setup.js",
+    "monitoring:check": "node scripts/monitoring/healthcheck.js",
+    "security:audit": "node scripts/security/audit.js",
+    "backup:verify": "node scripts/backup/verify.js",
+    "validate:all": "node scripts/validation/run-all.js",
+    "env:validate": "node scripts/config/validate-env.js",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:integration": "vitest integration",
+    "test:e2e": "cypress run",
+    "performance:analyze": "node scripts/performance/analyze.js"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
