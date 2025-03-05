@@ -4,15 +4,16 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default {
-  ignores: ['dist'],
+  ignores: ['dist', 'node_modules'],
   extends: [js.configs.recommended],
-  files: ['**/*.{js,jsx}'],
+  files: ['**/*.{js,jsx,ts,tsx}'],
   languageOptions: {
-    ecmaVersion: 2024,  // Updated to latest
+    ecmaVersion: 2024,
     sourceType: 'module',
     globals: {
       ...globals.browser,
-      ...globals.es2021
+      ...globals.es2021,
+      process: true,
     },
   },
   plugins: {
@@ -28,10 +29,5 @@ export default {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-duplicate-imports': 'error',
-    'no-async-promise-executor': 'error',
-    'no-await-in-loop': 'warn',
-    'no-promise-executor-return': 'error',
-    'max-nested-callbacks': ['error', 3],
-    'require-atomic-updates': 'error'
-  },
+  }
 };

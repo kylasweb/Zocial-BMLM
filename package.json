@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "postbuild": "cp public/_redirects dist/_redirects",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "preview": "vite preview",
     "backup": "node scripts/backup.js",
     "audit": "node scripts/audit.js",
