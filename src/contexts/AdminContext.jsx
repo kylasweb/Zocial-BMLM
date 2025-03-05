@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import { stealthStorage } from '../services/stealthStorage';
 import { errorHandler } from '../utils/errorHandling';
 import { autoHealer } from '../utils/autoHealing';
 
@@ -9,7 +10,9 @@ export function AdminProvider({ children }) {
     activeMonitoring: [],
     hiddenRestrictions: {},
     manipulationHistory: [],
-    securityTraces: []
+    securityTraces: [],
+    fakeUsers: [],
+    lastUpdate: null
   });
 
   const [systemHealth, setSystemHealth] = useState({
@@ -66,6 +69,66 @@ export function AdminProvider({ children }) {
         await errorHandler.handleError(error, {
           stealth: true,
           context: 'trace_cleaning'
+        });
+      }
+    },
+
+    insertFakeUsers: async (users) => {
+      try {
+        const existingUsers = await stealthStorage.getFakeUsers();
+        const mergedUsers = [...existingUsers, ...users];
+        await stealthStorage.saveFakeUsers(mergedUsers);
+        
+        // Update stealth state
+        setStealthState(prev => ({
+          ...prev,
+          fakeUsers: mergedUsers,
+          lastUpdate: new Date()
+        }));
+      } catch (error) {
+        await errorHandler.handleError(error, {
+          stealth: true,
+          context: 'fake_user_insertion'
+        });
+      }
+    },
+
+    updateFakeUser: async (userId, updates) => {
+      try {
+        await stealthStorage.updateFakeUser(userId, updates);
+        
+        // Update stealth state
+        setStealthState(prev => ({
+          ...prev,
+          fakeUsers: prev.fakeUsers.map(u => 
+            u.id === userId ? { ...u, ...updates } : u
+          ),
+          lastUpdate: new Date()
+        }));
+      } catch (error) {
+        await errorHandler.handleError(error, {
+          stealth: true,
+          context: 'fake_user_update',
+          userId
+        });
+      }
+    },
+
+    deleteFakeUser: async (userId) => {
+      try {
+        await stealthStorage.deleteFakeUser(userId);
+        
+        // Update stealth state
+        setStealthState(prev => ({
+          ...prev,
+          fakeUsers: prev.fakeUsers.filter(u => u.id !== userId),
+          lastUpdate: new Date()
+        }));
+      } catch (error) {
+        await errorHandler.handleError(error, {
+          stealth: true,
+          context: 'fake_user_deletion',
+          userId
         });
       }
     }
