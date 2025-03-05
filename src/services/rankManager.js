@@ -1,50 +1,51 @@
 class RankManager {
-  async evaluateRankProgression(userId) {
-    const userMetrics = await this.getUserMetrics(userId);
-    const rankCriteria = await this.getRankCriteria();
+  async evaluateRankAdvancement(userId) {
+    const currentRank = await this.getCurrentRank(userId);
+    const qualificationMetrics = await this.getQualificationMetrics(userId);
     
-    const eligibleRanks = rankCriteria
-      .filter(rank => this.isEligibleForRank(userMetrics, rank))
-      .sort((a, b) => b.level - a.level);
+    const nextRank = await this.determineNextRank(currentRank, qualificationMetrics);
+    const qualificationStatus = this.checkQualificationStatus(nextRank, qualificationMetrics);
 
-    const newRank = eligibleRanks[0];
-    if (newRank && newRank.level > userMetrics.currentRank.level) {
-      await this.processRankUpgrade(userId, newRank);
+    if (qualificationStatus.qualified) {
+      return await this.processRankAdvancement(userId, nextRank);
     }
 
     return {
-      currentRank: userMetrics.currentRank,
-      nextRank: this.getNextRank(userMetrics.currentRank),
-      progress: this.calculateRankProgress(userMetrics),
-      requirements: this.getRemainingRequirements(userMetrics)
+      currentRank,
+      nextRank,
+      requirements: qualificationStatus.remainingRequirements,
+      progress: qualificationStatus.progress
     };
   }
 
-  async processRankUpgrade(userId, newRank) {
-    const transaction = await this.startTransaction();
+  async maintainRankStatus(userId) {
+    const rankRequirements = await this.getRankRequirements(userId);
+    const currentMetrics = await this.getCurrentMetrics(userId);
     
-    try {
-      await Promise.all([
-        this.updateUserRank(userId, newRank),
-        this.distributeRankBonuses(userId, newRank),
-        this.updateAchievements(userId, 'RANK_ADVANCEMENT'),
-        this.notifyUpline(userId, { type: 'RANK_UPGRADE', rank: newRank }),
-        this.triggerRankRewards(userId, newRank)
-      ]);
+    const maintenanceStatus = this.evaluateMaintenanceRequirements(
+      rankRequirements,
+      currentMetrics
+    );
 
-      await transaction.commit();
-    } catch (error) {
-      await transaction.rollback();
-      throw new RankUpgradeError('Rank upgrade failed', { userId, error });
+    if (!maintenanceStatus.maintaining) {
+      await this.initiateGracePeriod(userId, maintenanceStatus);
     }
+
+    return {
+      status: maintenanceStatus.status,
+      warnings: maintenanceStatus.warnings,
+      recommendations: this.generateRecommendations(maintenanceStatus)
+    };
   }
 
-  calculateRankProgress(metrics) {
-    return Object.entries(metrics).map(([key, value]) => ({
-      metric: key,
-      current: value,
-      required: this.getRequiredValue(key, metrics.targetRank),
-      percentage: this.calculateProgressPercentage(value, key, metrics.targetRank)
-    }));
+  async processRankBenefits(userId, rank) {
+    const benefits = await this.getRankBenefits(rank);
+    
+    return Promise.all([
+      this.updateCommissionRates(userId, benefits.commissionRates),
+      this.updateBonusEligibility(userId, benefits.bonusTypes),
+      this.updatePrivileges(userId, benefits.privileges),
+      this.notifyRankBenefits(userId, benefits)
+    ]);
   }
 }

@@ -1,57 +1,56 @@
 class CommissionManager {
-  async processCommissions(period) {
-    const qualifiedUsers = await this.getQualifiedUsers(period);
+  async calculateCommissions(period) {
+    const salesData = await this.getPeriodSales(period);
     const commissionRules = await this.getCommissionRules();
     
-    const results = await Promise.allSettled(
-      qualifiedUsers.map(user => 
-        this.calculateAndDistributeCommission(user, period, commissionRules)
-      )
-    );
+    const calculations = salesData.map(sale => ({
+      ...this.calculateBasicCommission(sale, commissionRules),
+      bonuses: this.calculateBonuses(sale),
+      overrides: this.calculateOverrides(sale),
+      leadership: this.calculateLeadershipBonus(sale)
+    }));
 
-    await this.logCommissionResults(period, results);
-    return this.generateCommissionReport(results);
+    return {
+      periodTotal: this.sumCommissions(calculations),
+      breakdown: this.groupCommissionsByType(calculations),
+      distributions: await this.prepareDistributions(calculations)
+    };
   }
 
-  async calculateAndDistributeCommission(user, period, rules) {
+  async distributeCommissions(distributions) {
     const transaction = await this.startTransaction();
     
     try {
-      const salesMetrics = await this.getSalesMetrics(user.id, period);
-      const teamMetrics = await this.getTeamMetrics(user.id, period);
-      
-      const commission = {
-        direct: this.calculateDirectCommission(salesMetrics, rules),
-        team: this.calculateTeamCommission(teamMetrics, rules),
-        bonus: this.calculateBonusCommission(user, rules),
-        leadership: this.calculateLeadershipBonus(user, teamMetrics, rules)
-      };
+      const results = await Promise.all(
+        distributions.map(async dist => {
+          const validation = await this.validateDistribution(dist);
+          if (validation.isValid) {
+            return this.processDistribution(dist);
+          }
+          return { status: 'FAILED', error: validation.errors };
+        })
+      );
 
-      await Promise.all([
-        this.distributeCommission(user.id, commission),
-        this.updateCommissionHistory(user.id, commission, period),
-        this.notifyUser(user.id, 'COMMISSION_PAID', commission),
-        this.updateTaxRecords(user.id, commission)
-      ]);
-
+      await this.generateCommissionReports(results);
       await transaction.commit();
-      return { userId: user.id, commission, status: 'SUCCESS' };
+      return results;
     } catch (error) {
       await transaction.rollback();
-      return { userId: user.id, error, status: 'FAILED' };
+      throw new CommissionError('Commission distribution failed', { distributions, error });
     }
   }
 
-  async generateCommissionReport(results) {
-    const successful = results.filter(r => r.status === 'fulfilled');
-    const failed = results.filter(r => r.status === 'rejected');
+  async handleCommissionDisputes(dispute) {
+    const resolution = await this.investigateDispute(dispute);
+    
+    if (resolution.requiresAdjustment) {
+      await this.processCommissionAdjustment(resolution);
+    }
 
     return {
-      periodTotal: this.calculatePeriodTotal(successful),
-      successfulDistributions: successful.length,
-      failedDistributions: failed.length,
-      details: this.formatCommissionDetails(successful),
-      errors: this.formatErrorDetails(failed)
+      status: resolution.status,
+      adjustments: resolution.adjustments,
+      notifications: await this.sendDisputeResolution(resolution)
     };
   }
 }

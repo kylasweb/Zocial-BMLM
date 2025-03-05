@@ -1,47 +1,41 @@
 class TeamAnalytics {
-  async generateTeamReport(teamId, period = '30d') {
-    const metrics = await this.collectTeamMetrics(teamId, period);
-    const benchmarks = await this.getTeamBenchmarks(teamId.level);
-    
-    const analysis = {
-      overview: this.calculateTeamOverview(metrics),
-      performance: this.analyzePerformanceTrends(metrics, benchmarks),
-      weakPoints: this.identifyWeakPoints(metrics, benchmarks),
-      recommendations: this.generateRecommendations(metrics, benchmarks)
-    };
-
-    await this.cacheAnalysis(teamId, analysis);
-    return this.formatTeamReport(analysis);
-  }
-
-  async collectTeamMetrics(teamId, period) {
-    const startDate = this.calculateStartDate(period);
+  async generateTeamReport(leaderId, period) {
+    const teamStructure = await this.getTeamStructure(leaderId);
+    const metrics = await this.collectTeamMetrics(teamStructure, period);
     
     return {
-      recruitment: await this.getRecruitmentMetrics(teamId, startDate),
-      sales: await this.getSalesMetrics(teamId, startDate),
-      retention: await this.getRetentionMetrics(teamId, startDate),
-      engagement: await this.getEngagementMetrics(teamId, startDate),
-      progression: await this.getProgressionMetrics(teamId, startDate)
+      overview: this.generateOverview(metrics),
+      performance: await this.analyzePerformance(metrics),
+      recommendations: this.generateRecommendations(metrics),
+      trends: await this.analyzeTrends(metrics, period)
     };
   }
 
-  identifyWeakPoints(metrics, benchmarks) {
-    return Object.entries(metrics).reduce((weakPoints, [key, value]) => {
-      const benchmark = benchmarks[key];
-      const performance = (value / benchmark) * 100;
-      
-      if (performance < 80) {
-        weakPoints.push({
-          area: key,
-          current: value,
-          target: benchmark,
-          gap: benchmark - value,
-          priority: this.calculatePriority(performance)
-        });
-      }
-      
-      return weakPoints;
-    }, []);
+  async analyzePerformance(metrics) {
+    const analysis = {
+      salesMetrics: this.analyzeSalesPerformance(metrics),
+      recruitmentMetrics: this.analyzeRecruitment(metrics),
+      retentionMetrics: this.analyzeRetention(metrics),
+      engagementScores: await this.calculateEngagementScores(metrics)
+    };
+
+    return {
+      ...analysis,
+      topPerformers: this.identifyTopPerformers(analysis),
+      improvementAreas: this.findImprovementAreas(analysis),
+      projections: this.generateProjections(analysis)
+    };
+  }
+
+  async generateInsights(teamId) {
+    const teamData = await this.getTeamData(teamId);
+    const marketTrends = await this.getMarketTrends();
+    
+    return {
+      growthOpportunities: this.identifyGrowthOpportunities(teamData, marketTrends),
+      riskFactors: this.assessRiskFactors(teamData),
+      actionableInsights: this.generateActionableInsights(teamData),
+      benchmarkComparison: await this.compareToBenchmarks(teamData)
+    };
   }
 }

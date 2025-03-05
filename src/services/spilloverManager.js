@@ -1,58 +1,59 @@
 class SpilloverManager {
-  async handleSpillover(userId, newMemberId) {
+  async processSpillover(userId, newMember) {
     const transaction = await this.startTransaction();
     
     try {
-      const userMatrix = await this.getBinaryMatrix(userId);
-      const spilloverRules = await this.getSpilloverRules();
+      const uplineStructure = await this.getUplineStructure(userId);
+      const poolStatus = await this.getPoolStatus(uplineStructure);
       
-      const placement = await this.findOptimalPlacement(
-        userMatrix, 
-        newMemberId, 
-        spilloverRules
-      );
-
-      if (!placement.isValid) {
-        throw new SpilloverError('No valid placement found');
-      }
+      const placement = await this.determineOptimalPlacement({
+        newMember,
+        uplineStructure,
+        poolStatus,
+        rules: this.getPlacementRules()
+      });
 
       await Promise.all([
-        this.updateBinaryTree(placement),
-        this.updateSpilloverMetrics(userId, newMemberId),
-        this.recalculatePoolBalances(placement.poolId),
+        this.executeSpilloverPlacement(placement),
+        this.updateMatrixStructure(placement),
+        this.recalculatePoolBalances(poolStatus, placement),
         this.notifyAffectedUsers(placement)
       ]);
 
       await transaction.commit();
-      return placement;
+      return { status: 'SUCCESS', placement };
     } catch (error) {
       await transaction.rollback();
-      throw new SpilloverProcessingError(error.message);
+      throw new SpilloverError('Spillover processing failed', { userId, newMember, error });
     }
   }
 
-  async findOptimalPlacement(matrix, newMemberId, rules) {
-    const potentialPlacements = await this.analyzePotentialPlacements(matrix);
-    
-    return potentialPlacements
-      .filter(p => this.validatePlacement(p, rules))
-      .sort((a, b) => 
-        this.calculatePlacementScore(b, rules) - 
-        this.calculatePlacementScore(a, rules)
-      )[0];
+  async balancePool(poolId) {
+    const poolMetrics = await this.getPoolMetrics(poolId);
+    const imbalanceThreshold = this.getImbalanceThreshold(poolId);
+
+    if (this.requiresRebalancing(poolMetrics, imbalanceThreshold)) {
+      const rebalancePlan = this.createRebalancePlan(poolMetrics);
+      await this.executeRebalancing(rebalancePlan);
+    }
+
+    return {
+      status: poolMetrics.status,
+      balance: poolMetrics.balance,
+      nextRebalanceCheck: this.getNextRebalanceTime(poolMetrics)
+    };
   }
 
-  async recalculatePoolBalances(poolId) {
-    const pool = await this.getPoolDetails(poolId);
-    const members = await this.getPoolMembers(poolId);
-    
-    const newBalances = members.map(member => ({
-      userId: member.id,
-      balance: this.calculateMemberShare(member, pool),
-      bonusPoints: this.calculateBonusPoints(member, pool)
-    }));
+  async monitorPoolHealth() {
+    const activePools = await this.getActivePools();
+    const healthMetrics = await Promise.all(
+      activePools.map(pool => this.assessPoolHealth(pool))
+    );
 
-    await this.updatePoolBalances(poolId, newBalances);
-    return newBalances;
+    return healthMetrics.map(metric => ({
+      ...metric,
+      recommendations: this.generatePoolRecommendations(metric),
+      alerts: this.generatePoolAlerts(metric)
+    }));
   }
 }

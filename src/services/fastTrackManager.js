@@ -21,25 +21,55 @@ class FastTrackManager {
     };
   }
 
-  async processFastTrackBonus(userId, metrics) {
-    const bonusCalculator = new BonusCalculator();
-    const transaction = await this.startTransaction();
+  async processFastTrackBonus(userId) {
+    const qualificationPeriod = await this.getQualificationPeriod();
+    const userMetrics = await this.getUserMetrics(userId, qualificationPeriod);
+    
+    if (this.qualifiesForFastTrack(userMetrics)) {
+      return await this.awardFastTrackBonus(userId, userMetrics);
+    }
 
+    return {
+      status: 'PENDING',
+      progress: this.calculateProgress(userMetrics),
+      remainingRequirements: this.getRemainingRequirements(userMetrics)
+    };
+  }
+
+  async awardFastTrackBonus(userId, metrics) {
+    const transaction = await this.startTransaction();
+    
     try {
-      const bonus = await bonusCalculator.calculateFastTrackBonus(metrics);
-      
+      const bonusAmount = this.calculateBonusAmount(metrics);
+      const bonusDetails = {
+        userId,
+        amount: bonusAmount,
+        timestamp: new Date(),
+        type: 'FAST_TRACK',
+        metrics
+      };
+
       await Promise.all([
-        this.distributeFastTrackBonus(userId, bonus),
-        this.updateUserAchievements(userId, 'FAST_TRACK_COMPLETE'),
-        this.notifyUpline(userId, { type: 'FAST_TRACK_COMPLETION', bonus }),
-        this.updateLeaderboard(userId, 'FAST_TRACK')
+        this.distributeBonusReward(bonusDetails),
+        this.updateUserStatus(userId, 'FAST_TRACK_ACHIEVED'),
+        this.createBonusRecord(bonusDetails),
+        this.notifyUpline(userId, bonusDetails),
+        this.triggerAchievement(userId, 'FAST_TRACK_COMPLETION')
       ]);
 
       await transaction.commit();
-      return bonus;
+      return { status: 'SUCCESS', bonusDetails };
     } catch (error) {
       await transaction.rollback();
       throw new FastTrackError('Fast track bonus processing failed', { userId, error });
     }
+  }
+
+  calculateBonusAmount(metrics) {
+    const baseBonus = this.getBaseBonus(metrics.rank);
+    const multiplier = this.calculateMultiplier(metrics);
+    const timeBonus = this.calculateTimeBonus(metrics.completionSpeed);
+    
+    return baseBonus * multiplier + timeBonus;
   }
 }

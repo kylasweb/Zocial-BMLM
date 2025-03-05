@@ -4,7 +4,36 @@
   functions = "netlify/functions"
 
 [build.environment]
-  NODE_VERSION = "20"
+# Base Configuration
+NODE_VERSION = "20"
+NODE_ENV = "production"
+
+# The following variables should be set in Netlify's UI:
+
+# API Configuration
+VITE_API_URL = "https://api.yourapp.com"
+REACT_APP_API_URL = "https://api.yourapp.com"
+
+# Authentication
+VITE_CLERK_PUBLISHABLE_KEY = "pk_test_c291bmQtaGlwcG8tMzguY2xlcmsuYWNjb3VudHMuZGV2JA"
+CLERK_SECRET_KEY = "sk_test_6KywXNhtgdUbLuYNUIPDaur9huGAoe6FPENaUlEZBW"
+
+# Monitoring
+SENTRY_DSN = "https://your-sentry-dsn.ingest.sentry.io/"
+
+# Web3 Configuration
+VITE_WEB3_NETWORK = "mainnet"
+VITE_TOKEN_DISTRIBUTOR_ADDRESS = "0x..."
+
+# Netlify Specific
+NETLIFY_AUTH_TOKEN = "your_netlify_auth_token"
+NETLIFY_SITE_ID = "your_netlify_site_id"
+
+# Security & CORS
+CORS_ORIGIN = "https://your-production-domain.com"
+
+# Database Configuration
+MONGODB_URI = "mongodb+srv://..."
 
 [[plugins]]
   package = "@netlify/plugin-mongodb"
