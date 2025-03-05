@@ -15,7 +15,7 @@
   package = "@netlify/plugin-mongodb"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"  # Updated from 18 to match Vite's requirements
 
 [[redirects]]
   from = "/api/*"

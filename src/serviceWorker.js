@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mlm-cache-v1';
+const CACHE_NAME = 'mlm-cache-v2';  // Increment cache version
 const urlsToCache = [
   '/',
   '/index.html',

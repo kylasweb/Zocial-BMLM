@@ -6,7 +6,11 @@ class SystemErrorHandler {
   constructor() {
     this.retrier = new Retrier(
       error => this.shouldRetry(error),
-      { timeout: 120000 } // 2 minutes timeout
+      { 
+        timeout: 120000,
+        maxAttempts: 3,
+        backoff: 'exponential'
+      }
     );
     
     this.errorPatterns = new Map([
@@ -14,7 +18,8 @@ class SystemErrorHandler {
       ['AUTHENTICATION', /auth.*failed|invalid.*token|expired/i],
       ['RATE_LIMIT', /rate.*limit|too.*many.*requests/i],
       ['NETWORK', /network.*error|connection.*lost/i],
-      ['VALIDATION', /validation.*failed|invalid.*input/i]
+      ['VALIDATION', /validation.*failed|invalid.*input/i],
+      ['PERMISSION', /permission.*denied|unauthorized|forbidden/i]
     ]);
   }
 
@@ -36,29 +41,21 @@ class SystemErrorHandler {
     const errorType = this.identifyErrorType(error);
     const healing = this.initiateAutoHealing(errorType, error);
     
-    // Silent logging for stealth operations
     if (context.stealth) {
       await this.logStealthError(error, context);
       return;
     }
 
-    // Regular error handling
-    switch (errorType) {
-      case 'DATABASE_CONNECTION':
-        await this.handleDatabaseError(error);
-        break;
-      case 'AUTHENTICATION':
-        await this.handleAuthError(error);
-        break;
-      case 'RATE_LIMIT':
-        await this.handleRateLimitError(error);
-        break;
-      case 'NETWORK':
-        await this.handleNetworkError(error);
-        break;
-      default:
-        await this.handleGenericError(error);
-    }
+    const errorActions = {
+      DATABASE_CONNECTION: this.handleDatabaseError,
+      AUTHENTICATION: this.handleAuthError,
+      RATE_LIMIT: this.handleRateLimit,
+      NETWORK: this.handleNetworkError,
+      PERMISSION: this.handlePermissionError,
+    };
+
+    const handler = errorActions[errorType] || this.handleGenericError;
+    await handler.call(this, error);
 
     return healing;
   }
@@ -158,6 +155,14 @@ class SystemErrorHandler {
 
   async healNetwork(error) {
     // Implement network healing logic
+  }
+
+  async handlePermissionError(error) {
+    store.dispatch(addNotification({
+      type: 'error',
+      message: 'You do not have permission to perform this action.',
+      duration: 5000
+    }));
   }
 }
 

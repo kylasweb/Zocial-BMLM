@@ -8,11 +8,19 @@ import AppRoutes from './routes/AppRoutes';
 import { Toaster } from './components/ui/Toaster';
 import './App.css';
 
-if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key');
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPubKey) {
+  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY environment variable');
 }
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Add Content Security Policy
+if (typeof window !== 'undefined') {
+  const meta = document.createElement('meta');
+  meta.httpEquiv = 'Content-Security-Policy';
+  meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';";
+  document.head.appendChild(meta);
+}
 
 function App() {
   return (
@@ -30,12 +38,12 @@ function App() {
         }}
       >
         <Router>
-          <AuthProvider>
-            <NetworkProvider>
+          <NetworkProvider>
+            <AuthProvider>
               <AppRoutes />
               <Toaster />
-            </NetworkProvider>
-          </AuthProvider>
+            </AuthProvider>
+          </NetworkProvider>
         </Router>
       </ClerkProvider>
     </ErrorBoundary>

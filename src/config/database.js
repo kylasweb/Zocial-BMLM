@@ -3,7 +3,6 @@ import { errorHandler } from '../utils/errorHandling';
 
 const connectDB = async () => {
   try {
-    // Use Netlify environment variables
     const dbUri = process.env.MONGODB_URI;
     
     if (!dbUri) {
@@ -16,33 +15,39 @@ const connectDB = async () => {
       autoIndex: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      family: 4
+      family: 4,
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      maxIdleTimeMS: 30000,
+      compressors: ['zlib'],
     };
 
-    // Connect to MongoDB
     await mongoose.connect(dbUri, options);
-
     console.log('MongoDB connected successfully');
 
-    // Handle connection events
     mongoose.connection.on('error', async (error) => {
       await errorHandler.handleError(error, {
         context: 'database_connection',
-        critical: true
+        severity: 'high'
       });
     });
 
     mongoose.connection.on('disconnected', async () => {
       await errorHandler.handleError(new Error('Database disconnected'), {
         context: 'database_connection',
-        critical: true
+        severity: 'high'
       });
+    });
+
+    process.on('SIGINT', async () => {
+      await mongoose.connection.close();
+      process.exit(0);
     });
 
   } catch (error) {
     await errorHandler.handleError(error, {
-      context: 'database_connection',
-      critical: true
+      context: 'database_connection_initial',
+      severity: 'critical'
     });
     process.exit(1);
   }

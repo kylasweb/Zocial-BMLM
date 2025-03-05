@@ -8,8 +8,12 @@ export default {
   extends: [js.configs.recommended],
   files: ['**/*.{js,jsx}'],
   languageOptions: {
-    ecmaVersion: 2020,
-    globals: globals.browser,
+    ecmaVersion: 2024,  // Updated to latest
+    sourceType: 'module',
+    globals: {
+      ...globals.browser,
+      ...globals.es2021
+    },
   },
   plugins: {
     'react-hooks': reactHooks,
@@ -21,5 +25,8 @@ export default {
       'warn',
       { allowConstantExport: true },
     ],
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-duplicate-imports': 'error',
   },
 };
