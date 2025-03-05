@@ -1,34 +1,38 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
   build: {
+    outDir: 'dist',
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-core': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@clerk/clerk-react', 'framer-motion'],
-          'vendor-charts': ['echarts', 'echarts-for-react'],
-          'vendor-editor': ['@monaco-editor/react', 'codemirror'],
+          'vendor': [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@clerk/clerk-react',
+            'ethers'
+          ]
         }
       }
-    },
-    chunkSizeWarningLimit: 1000,
-    target: 'esnext',
-    minify: 'esbuild',
-    sourcemap: true,
-    cssCodeSplit: true,
-    assetsInlineLimit: 4096,
+    }
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
   },
   server: {
     port: 5173,
-    strictPort: true,
-    host: true,
-    cors: true,
-  },
-  preview: {
-    port: 4173,
-    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      }
+    }
   }
 });

@@ -8,7 +8,10 @@
     "build": "vite build",
     "postbuild": "cp public/_redirects dist/_redirects",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backup": "node scripts/backup.js",
+    "audit": "node scripts/audit.js",
+    "monitor": "node scripts/monitor.js"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
@@ -41,6 +44,9 @@
     "jotai": "^2.12.1",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
+    "netlify-plugin-cache": "^1.0.3",
+    "netlify-plugin-checklinks": "^4.1.1",
+    "netlify-plugin-submit-sitemap": "^0.4.0",
     "react": "^18.3.1",
     "react-ace": "^14.0.1",
     "react-admin": "^4.0.0",
@@ -58,7 +64,9 @@
     "uuid": "^9.0.0",
     "xss-clean": "^0.1.4",
     "zod": "^3.24.2",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "@sentry/react": "^7.0.0",
+    "@sentry/tracing": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

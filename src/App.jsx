@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
@@ -7,6 +8,9 @@ import { FeatureProvider } from './contexts/FeatureContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import AppRoutes from './routes/AppRoutes';
 import { Toaster } from './components/ui/Toaster';
+import { initSentry } from './utils/sentry';
+import { MonitoringService } from './services/MonitoringService';
+import { BackupService } from './services/BackupService';
 import './App.css';
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -15,15 +19,16 @@ if (!clerkPubKey) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY environment variable');
 }
 
-// Add Content Security Policy
-if (typeof window !== 'undefined') {
-  const meta = document.createElement('meta');
-  meta.httpEquiv = 'Content-Security-Policy';
-  meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';";
-  document.head.appendChild(meta);
-}
+// Initialize services
+initSentry();
 
 function App() {
+  useEffect(() => {
+    // Initialize monitoring and backups
+    MonitoringService.initializeMonitoring();
+    BackupService.scheduleBackups();
+  }, []);
+
   return (
     <ErrorBoundary>
       <FeatureProvider>

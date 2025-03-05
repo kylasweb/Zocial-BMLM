@@ -3,6 +3,48 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-mongodb"
+
+[[plugins]]
+  package = "netlify-plugin-cache"
+  [plugins.inputs]
+    paths = [
+      "node_modules/.cache",
+      "dist"
+    ]
+
+[[plugins]]
+  package = "netlify-plugin-submit-sitemap"
+
+[[plugins]]
+  package = "netlify-plugin-checklinks"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.dev; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.clerk.dev https://*.ethereum.network wss://*.ethereum.network;"
+    X-XSS-Protection = "1; mode=block"
+    Cache-Control = "public, max-age=31536000"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
 [dev]
   command = "npm run dev"
   targetPort = 5173
@@ -10,12 +52,6 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@clerk/clerk-sdk-node"]
-
-[[plugins]]
-  package = "@netlify/plugin-mongodb"
-
-[build.environment]
-  NODE_VERSION = "20"  # Updated from 18 to match Vite's requirements
 
 [[redirects]]
   from = "/api/*"

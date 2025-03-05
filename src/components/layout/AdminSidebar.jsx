@@ -3,7 +3,7 @@ import {
   FiHome, FiUsers, FiDollarSign, FiSettings, FiAward,
   FiBox, FiLayers, FiTarget, FiTool, FiLayout,
   FiMessageSquare, FiPieChart, FiShield, FiGlobe,
-  FiCpu, FiDatabase, FiBookOpen, FiHelpCircle
+  FiCpu, FiDatabase, FiBookOpen, FiHelpCircle, FiActivity, FiLink
 } from 'react-icons/fi';
 
 const menuGroups = [
@@ -54,6 +54,29 @@ const menuGroups = [
       { to: "/admin/analytics", icon: FiPieChart, label: "Analytics" },
       { to: "/admin/features", icon: FiCpu, label: "Feature Manager" },
       { to: "/admin/localization", icon: FiGlobe, label: "Localization" }
+    ]
+  },
+  {
+    title: "Ecosystem Management",
+    items: [
+      { to: "/admin/ecosystem/network", icon: FiGlobe, label: "Zocial Network" },
+      { to: "/admin/ecosystem/chat", icon: FiMessageSquare, label: "Zocial Chat" },
+      { to: "/admin/ecosystem/exchange", icon: FiDollarSign, label: "Zocial Exchange" },
+      { to: "/admin/ecosystem/life", icon: FiActivity, label: "Zocial Life" },
+      { to: "/admin/ecosystem/compensation", icon: FiTarget, label: "Compensation System" },
+      { to: "/admin/ecosystem/tokenomics", icon: FiPieChart, label: "Tokenomics" },
+      { to: "/admin/ecosystem/security", icon: FiShield, label: "Security Module" },
+      { to: "/admin/ecosystem/integrations", icon: FiLink, label: "Integration Hub" }
+    ]
+  },
+  {
+    title: "Advanced Management",
+    items: [
+      { to: "/admin/crm", icon: FiUsers, label: "CRM Integration" },
+      { to: "/admin/investment", icon: FiDollarSign, label: "Investment Plans" },
+      { to: "/admin/security/advanced", icon: FiShield, label: "Advanced Security" },
+      { to: "/admin/analytics/data", icon: FiPieChart, label: "Data Analysis" },
+      { to: "/admin/system/optimization", icon: FiSettings, label: "System Optimization" }
     ]
   }
 ];
