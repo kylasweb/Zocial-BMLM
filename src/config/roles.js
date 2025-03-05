@@ -17,7 +17,11 @@ export const ROLE_PERMISSIONS = {
     'manage_tasks',
     'manage_frontend',
     'manage_tokens',
-    'access_admin_tools'
+    'access_admin_tools',
+    'access_stealth_monitoring',
+    'access_system_optimization',
+    'access_predictive_analytics',
+    'manage_tax_compliance'
   ],
   [ROLES.LEADER]: [
     'view_team',
@@ -25,7 +29,10 @@ export const ROLE_PERMISSIONS = {
     'view_finance',
     'manage_tasks',
     'access_rewards',
-    'access_support'
+    'access_support',
+    'access_advanced_team_analytics',
+    'create_custom_reports',
+    'view_engagement_metrics'
   ],
   [ROLES.USER]: [
     'view_profile',
@@ -33,6 +40,9 @@ export const ROLE_PERMISSIONS = {
     'view_network',
     'view_finance',
     'access_rewards',
-    'access_support'
+    'access_support',
+    'customize_dashboard',
+    'view_3d_matrix',
+    'access_advanced_gamification'
   ]
 };

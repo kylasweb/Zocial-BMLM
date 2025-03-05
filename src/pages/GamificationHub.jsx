@@ -10,7 +10,15 @@ export default function GamificationHub() {
       description: 'Recruit 5 members in your first month',
       progress: 3,
       target: 5,
-      reward: 100
+      reward: {
+        tokens: 100,
+        badge: 'fast-starter',
+        rankPoints: 50,
+        unlocks: ['premium-tools']
+      },
+      tier: 'bronze',
+      expiresAt: '2024-04-01',
+      multiplier: 1.5
     },
     {
       id: 2,
