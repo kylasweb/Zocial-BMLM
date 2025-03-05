@@ -1,56 +1,136 @@
-export interface Pool {
-  id: number;
-  name: string;
-  status: 'active' | 'inactive' | 'pending';
-  capacity: number;
-  currentMembers: number;
-  spilloverRules: SpilloverRule[];
-  rewards: PoolReward[];
-  createdAt: string;
-  updatedAt: string;
+// Base Types
+export interface User {
+  id: string;
+  rank: Rank;
+  sponsor: string;
+  placement: string;
+  joinDate: string;
+  status: 'active' | 'inactive' | 'suspended';
+  metrics: UserMetrics;
 }
 
-export interface SpilloverRule {
-  id: number;
-  sourcePoolId: number;
-  targetPoolId: number;
-  condition: 'overflow' | 'achievement' | 'time';
-  threshold: number;
-  priority: number;
+export interface UserMetrics {
+  personalVolume: number;
+  groupVolume: number;
+  directReferrals: number;
+  totalTeamSize: number;
+  activeDownlines: number;
+  totalEarnings: number;
 }
 
 export interface Rank {
-  id: number;
+  id: string;
   name: string;
   level: number;
-  requirements: RankRequirement[];
-  benefits: RankBenefit[];
-  color: string;
-  icon: string;
+  requirements: RankRequirements;
+  benefits: RankBenefits;
+  achievements: Achievement[];
 }
 
-export interface RankRequirement {
-  type: 'personal_sales' | 'team_sales' | 'downline_count' | 'time_period';
-  value: number;
-  timeframe?: 'daily' | 'weekly' | 'monthly' | 'lifetime';
+export interface RankRequirements {
+  personalVolume: number;
+  groupVolume: number;
+  directReferrals: number;
+  activeDownlines: number;
+  minimumLegCount: number;
+  qualifiedLegs: number;
+}
+
+export interface RankBenefits {
+  commissionRate: number;
+  bonusRate: number;
+  maxPayoutLevel: number;
+  poolAccess: string[];
+  specialRewards: Reward[];
 }
 
 export interface Commission {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
+  type: CommissionType;
   amount: number;
-  type: 'direct' | 'indirect' | 'bonus' | 'pool';
-  status: 'pending' | 'approved' | 'paid';
-  createdAt: string;
-  paidAt?: string;
+  source: string;
+  level: number;
+  status: 'pending' | 'approved' | 'paid' | 'rejected';
+  timestamp: string;
+  details: Record<string, any>;
 }
 
-export interface CRMContact {
-  id: number;
-  userId: number;
-  status: 'lead' | 'prospect' | 'customer' | 'inactive';
-  source: string;
-  lastContact: string;
-  notes: string[];
+export type CommissionType = 
+  | 'direct' 
+  | 'binary' 
+  | 'matching' 
+  | 'leadership' 
+  | 'pool' 
+  | 'achievement';
+
+// CRM Types
+export interface Customer {
+  id: string;
+  userId: string;
+  profile: CustomerProfile;
+  interactions: CustomerInteraction[];
+  purchases: Purchase[];
+  status: CustomerStatus;
+}
+
+export interface CustomerProfile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: Address;
+  preferences: Record<string, any>;
   tags: string[];
+}
+
+export interface CustomerInteraction {
+  id: string;
+  type: 'call' | 'email' | 'meeting' | 'support';
+  timestamp: string;
+  notes: string;
+  outcome: string;
+  followUpDate?: string;
+}
+
+// State Management Types
+export interface MLMState {
+  ranks: RankState;
+  pools: PoolState;
+  commissions: CommissionState;
+  crm: CRMState;
+}
+
+export interface RankState {
+  ranks: Rank[];
+  userRanks: Record<string, string>;
+  rankHistory: RankHistoryEntry[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface PoolState {
+  pools: Pool[];
+  activePool: string | null;
+  spilloverRules: SpilloverRule[];
+  poolMetrics: Record<string, PoolMetrics>;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface CommissionState {
+  commissions: Commission[];
+  pendingPayouts: number;
+  totalPaid: number;
+  commissionRules: CommissionRule[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface CRMState {
+  customers: Customer[];
+  interactions: CustomerInteraction[];
+  metrics: CRMMetrics;
+  loading: boolean;
+  error: string | null;
 }
