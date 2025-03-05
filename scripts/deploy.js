@@ -30,6 +30,22 @@ const config = {
   }
 };
 
+const stagingConfig = {
+  VITE_API_URL: "https://staging-api.yourapp.com",
+  VITE_CLERK_PUBLISHABLE_KEY: "pk_test_c291bmQtaGlwcG8tMzguY2xlcmsuYWNjb3VudHMuZGV2JA",
+  VITE_WEB3_NETWORK: "testnet",
+  NODE_ENV: "staging",
+  CORS_ORIGIN: "https://staging.yourapp.com"
+};
+
+const productionConfig = {
+  VITE_API_URL: "https://api.yourapp.com",
+  VITE_CLERK_PUBLISHABLE_KEY: "pk_live_your_prod_clerk_key",
+  VITE_WEB3_NETWORK: "mainnet",
+  NODE_ENV: "production",
+  CORS_ORIGIN: "https://yourapp.com"
+};
+
 // Deploy function
 async function deploy() {
   try {
