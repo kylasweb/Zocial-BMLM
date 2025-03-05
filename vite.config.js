@@ -27,7 +27,15 @@ export default defineConfig({
             './src/pages/admin/Dashboard/components/AnalyticsCharts',
             './src/pages/admin/Dashboard/components/QuickActions'
           ],
-          'auth': ['./src/pages/auth/Login']
+          'auth': ['./src/pages/auth/Login'],
+          'dashboard-features': [
+            './src/components/dashboard/BinaryMatrix',
+            './src/components/dashboard/InvestmentPlan',
+            './src/components/dashboard/PoolManagement',
+            './src/components/dashboard/RankManagement',
+            './src/components/dashboard/CrmIntegration',
+            './src/components/dashboard/CommissionManagement'
+          ]
         }
       }
     },
