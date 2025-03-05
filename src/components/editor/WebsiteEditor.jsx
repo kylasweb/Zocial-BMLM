@@ -9,6 +9,11 @@ import ResponsiveControls from './ResponsiveControls';
 import CodeEditor from './CodeEditor';
 import TemplateLibrary from './TemplateLibrary';
 import RevisionHistory from './RevisionHistory';
+import ThemeEditor from './ThemeEditor';
+import ThemePresetManager from '../theme/ThemePresetManager';
+import PageTemplateManager from './PageTemplateManager';
+import ComponentLibrary from './ComponentLibrary';
+import StyleHistory from './StyleHistory';
 
 export default function WebsiteEditor() {
   const [selectedElement, setSelectedElement] = useState(null);
@@ -144,71 +149,89 @@ export default function WebsiteEditor() {
   };
 
   return (
-    <div className="flex h-screen">
-      <div className="flex flex-col w-64 bg-gray-800 text-white">
-        <ElementLibrary onElementSelect={handleElementSelect} />
-        <TemplateLibrary onTemplateSelect={handleTemplateApply} />
+    <div className="grid grid-cols-12 gap-4 p-4">
+      <div className="col-span-3 space-y-4">
+        <ComponentLibrary />
+        <StyleHistory />
       </div>
-
-      <div className="flex-1 flex flex-col">
-        <div className="h-16 bg-white border-b flex items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
-            <button onClick={handleUndo} disabled={historyIndex <= 0}>
-              <FiUndo />
-            </button>
-            <button onClick={handleRedo} disabled={historyIndex >= history.length - 1}>
-              <FiRedo />
-            </button>
-            <ResponsiveControls
-              activeMode={viewMode}
-              onModeChange={handleViewModeChange}
-            />
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setShowCode(!showCode)}>
-              <FiCode />
-            </button>
-            <button onClick={handleSave}>
-              <FiSave />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1 flex">
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="flex-1 bg-gray-100 overflow-auto">
-              {showCode ? (
-                <CodeEditor
-                  structure={pageStructure}
-                  onUpdate={setPageStructure}
-                />
-              ) : (
-                <EditorCanvas
-                  structure={pageStructure}
-                  styles={generateResponsiveStyles()}
-                  viewMode={viewMode}
-                  onElementSelect={handleElementSelect}
-                />
-              )}
+      
+      <div className="col-span-6">
+        {/* Main editing area */}
+        <div id="page-content" className="min-h-screen bg-white rounded-lg shadow">
+          <div className="flex h-screen">
+            <div className="flex flex-col w-64 bg-gray-800 text-white">
+              <ElementLibrary onElementSelect={handleElementSelect} />
+              <TemplateLibrary onTemplateSelect={handleTemplateApply} />
             </div>
-          </DragDropContext>
 
-          {selectedElement && (
-            <StyleEditor
-              element={selectedElement}
+            <div className="flex-1 flex flex-col">
+              <div className="h-16 bg-white border-b flex items-center justify-between px-4">
+                <div className="flex items-center space-x-4">
+                  <button onClick={handleUndo} disabled={historyIndex <= 0}>
+                    <FiUndo />
+                  </button>
+                  <button onClick={handleRedo} disabled={historyIndex >= history.length - 1}>
+                    <FiRedo />
+                  </button>
+                  <ResponsiveControls
+                    activeMode={viewMode}
+                    onModeChange={handleViewModeChange}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <button onClick={() => setShowCode(!showCode)}>
+                    <FiCode />
+                  </button>
+                  <button onClick={handleSave}>
+                    <FiSave />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 flex">
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <div className="flex-1 bg-gray-100 overflow-auto">
+                    {showCode ? (
+                      <CodeEditor
+                        structure={pageStructure}
+                        onUpdate={setPageStructure}
+                      />
+                    ) : (
+                      <EditorCanvas
+                        structure={pageStructure}
+                        styles={generateResponsiveStyles()}
+                        viewMode={viewMode}
+                        onElementSelect={handleElementSelect}
+                      />
+                    )}
+                  </div>
+                </DragDropContext>
+
+                {selectedElement && (
+                  <StyleEditor
+                    element={selectedElement}
+                    viewMode={viewMode}
+                    onStyleUpdate={updateElementStyles}
+                  />
+                )}
+              </div>
+            </div>
+
+            <PreviewPane
+              structure={pageStructure}
+              styles={generateResponsiveStyles()}
               viewMode={viewMode}
-              onStyleUpdate={updateElementStyles}
             />
-          )}
+          </div>
         </div>
       </div>
-
-      <PreviewPane
-        structure={pageStructure}
-        styles={generateResponsiveStyles()}
-        viewMode={viewMode}
-      />
+      
+      <div className="col-span-3 space-y-4">
+        <ThemeEditor />
+        <ThemePresetManager />
+        <PageTemplateManager />
+      </div>
     </div>
   );
 }
