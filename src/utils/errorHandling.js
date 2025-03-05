@@ -1,6 +1,7 @@
 import { Retrier } from "@humanwhocodes/retry";
 import { store } from '../store';
 import { addNotification } from '../store/notificationSlice';
+import { MonitoringService } from '../services/MonitoringService';
 
 class SystemErrorHandler {
   constructor() {
@@ -148,41 +149,56 @@ class SystemErrorHandler {
 
   // Healing methods
   async healDatabaseConnection(error) {
-    // Implement database healing logic
+    const pool = await import('../services/database').then(m => m.pool);
+    await pool.end();
+    await pool.connect();
+    await this.verifyDatabaseConnection();
   }
 
   async healAuthentication(error) {
-    // Implement authentication healing logic
+    const auth = await import('../services/auth').then(m => m.default);
+    await auth.refreshToken();
+    await this.verifyAuthStatus();
   }
 
   async healRateLimit(error) {
-    // Implement rate limit healing logic
+    await new Promise(resolve => setTimeout(resolve, 1000 * 60));
+    return this.retrier.execute(async () => {
+      const response = await fetch('/api/health');
+      if (!response.ok) throw new Error('Rate limit still active');
+    });
   }
 
   async healNetwork(error) {
-    // Implement network healing logic
-  }
-
-  async handlePermissionError(error) {
-    store.dispatch(addNotification({
-      type: 'error',
-      message: 'You do not have permission to perform this action.',
-      duration: 5000
-    }));
+    await MonitoringService.checkNetworkConnectivity();
+    if (!await this.isOnline()) {
+      throw new Error('Network still unavailable');
+    }
   }
 
   async healAPIError(error) {
     return this.retrier.execute(async () => {
-      // Implement API recovery logic
-      await this.checkAPIHealth();
+      const health = await fetch('/api/health');
+      if (!health.ok) throw new Error('API still unhealthy');
       await this.reconnectAPI();
     });
   }
 
   async healMemoryIssue(error) {
-    // Implement memory cleanup
-    await this.garbageCollect();
-    await this.clearCache();
+    if (typeof window !== 'undefined') {
+      window.gc && window.gc();
+    }
+    // Clear non-essential caches
+    this.clearApplicationCaches();
+  }
+
+  private async clearApplicationCaches() {
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+    }
   }
 }
 

@@ -1,26 +1,68 @@
-import { SUPER_ADMIN_CREDENTIALS, ROLES } from '../config/roles';
+import { z } from 'zod';
+import { errorHandler } from '../utils/errorHandling';
+
+const adminCredentialsSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(12)
+});
 
 export const authService = {
   login: async (email, password) => {
-    // Special handling for super admin
-    if (email === SUPER_ADMIN_CREDENTIALS.email) {
-      if (password !== SUPER_ADMIN_CREDENTIALS.password) {
-        throw new Error('Invalid super admin credentials');
+    try {
+      // Generic error message for all auth failures
+      const invalidCredentialsError = new Error('Invalid credentials');
+
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (!adminEmail || !adminPassword) {
+        throw new Error('Admin credentials not configured');
       }
-      return {
-        role: ROLES.SUPER_ADMIN,
-        permissions: ['*'],
-        isSuperAdmin: true
-      };
+
+      // Validate admin credentials format
+      adminCredentialsSchema.parse({ email: adminEmail, password: adminPassword });
+
+      if (email === adminEmail) {
+        // Use timing-safe comparison for password
+        const isValid = await crypto.subtle.timingSafeEqual(
+          new TextEncoder().encode(password),
+          new TextEncoder().encode(adminPassword)
+        );
+
+        if (!isValid) {
+          throw invalidCredentialsError;
+        }
+
+        return {
+          role: 'ADMIN',
+          permissions: ['*'],
+          isAdmin: true
+        };
+      }
+
+      // Regular login logic...
+      
+    } catch (error) {
+      await errorHandler.handleError(error, { context: 'auth_service' });
+      throw invalidCredentialsError; // Always return generic error
     }
-    
-    // Regular login logic...
   },
 
   validateAccess: (user, requiredRole) => {
-    if (user.email === SUPER_ADMIN_CREDENTIALS.email) {
-      return true; // Super admin has access to everything
+    try {
+      if (!user || !requiredRole) {
+        return false;
+      }
+
+      if (user.role === 'ADMIN') {
+        return true;
+      }
+
+      // Regular role-based access control...
+      return user.role === requiredRole;
+    } catch (error) {
+      errorHandler.handleError(error, { context: 'access_validation' });
+      return false; // Fail secure
     }
-    // Regular access validation...
   }
 };

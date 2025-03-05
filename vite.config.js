@@ -1,37 +1,38 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { splitVendorChunkPlugin } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    splitVendorChunkPlugin(),
+    visualizer({
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
   build: {
-    outDir: 'dist',
-    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            '@clerk/clerk-react',
-            'ethers'
-          ]
-        }
-      }
-    }
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
-    }
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'clerk': ['@clerk/clerk-react'],
+          'ui-libs': ['@radix-ui/react-toast', '@radix-ui/react-dialog'],
+          'charts': ['recharts'],
+          'editors': ['@monaco-editor/react', '@codemirror/basic-setup'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
-    port: 5173,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false,
       }
     }
   }

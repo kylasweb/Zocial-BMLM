@@ -1,41 +1,33 @@
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import { ROLES } from '../config/roles';
-import Layout from '../components/layout/Layout';
-import PublicLayout from '../components/layout/PublicLayout';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import Onboarding from '../pages/Onboarding';
-import Dashboard from '../pages/Dashboard';
-import Network from '../pages/Network';
-import Profile from '../pages/Profile';
-import LandingPage from '../pages/public/LandingPage';
-import Plans from '../pages/public/Plans';
-import GDPRPage from '../pages/public/GDPRPage';
-import AdminDashboard from '../pages/dashboard/AdminDashboard';
-import LeaderDashboard from '../pages/dashboard/LeaderDashboard';
-import UserDashboard from '../pages/dashboard/UserDashboard';
-import UserManagement from '../pages/admin/UserManagement';
-import RewardsManagement from '../pages/admin/RewardsManagement';
-import InvestmentPlans from '../pages/admin/InvestmentPlans';
-import TaskManagement from '../pages/admin/TaskManagement';
-import PoolManagement from '../pages/admin/PoolManagement';
-import TokenManagement from '../pages/admin/TokenManagement';
-import FrontendManager from '../pages/admin/frontend/FrontendManager';
-import BalanceAdjustment from '../pages/admin/tools/BalanceAdjustment';
-import RankAdjustment from '../pages/admin/tools/RankAdjustment';
-import GamificationHub from '../pages/GamificationHub';
-import NotFound from '../pages/NotFound';
+import LoadingSpinner from '../components/LoadingSpinner';
+
+// Lazy load components
+const LandingPage = lazy(() => import('../pages/LandingPage'));
+const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
+const UserManagement = lazy(() => import('../pages/admin/UserManagement'));
+const InvestmentPlans = lazy(() => import('../pages/admin/InvestmentPlans'));
+const TaskManagement = lazy(() => import('../pages/admin/TaskManagement'));
+const PoolManagement = lazy(() => import('../pages/admin/PoolManagement'));
+const TokenManagement = lazy(() => import('../pages/admin/TokenManagement'));
+const FrontendManager = lazy(() => import('../pages/admin/frontend/FrontendManager'));
+const BalanceAdjustment = lazy(() => import('../pages/admin/tools/BalanceAdjustment'));
+const RankAdjustment = lazy(() => import('../pages/admin/tools/RankAdjustment'));
+const GamificationHub = lazy(() => import('../pages/GamificationHub'));
+const NotFound = lazy(() => import('../pages/NotFound'));
+
+const SuspenseWrapper = ({ children }) => (
+  <Suspense fallback={<LoadingSpinner />}>
+    {children}
+  </Suspense>
+);
 
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user, isLoaded } = useUser();
   
   if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!user) {
@@ -43,10 +35,10 @@ const ProtectedRoute = ({ children, roles = [] }) => {
   }
 
   if (roles.length && !roles.includes(user.publicMetadata?.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  return children;
+  return <SuspenseWrapper>{children}</SuspenseWrapper>;
 };
 
 const PublicRoutes = () => {
@@ -85,7 +77,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route element={<PublicRoutes />}>
+      <Route element={<SuspenseWrapper><PublicRoutes /></SuspenseWrapper>}>
         <Route index element={<LandingPage />} />
         <Route path="about" element={<AboutPage />} />
         <Route path="features" element={<FeaturesPage />} />
