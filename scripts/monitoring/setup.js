@@ -1,5 +1,5 @@
-import { MonitoringService } from '../../src/services/MonitoringService';
-import { validateEnv } from '../../src/config/envValidation';
+import { MonitoringService } from '../../src/services/MonitoringService.js';
+import { validateEnv } from '../../src/config/envValidation.js';
 
 async function setupMonitoring() {
   try {

@@ -1,13 +1,12 @@
-import * as Sentry from "@sentry/react";
-import { Performance } from "@sentry/react";
-import { securityConfig } from '../config/security.config';
+import * as Sentry from "@sentry/node";
 
 export class MonitoringService {
   static async initializeMonitoring() {
-    // Performance monitoring
-    Performance.init({
+    // Initialize Sentry
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.NODE_ENV,
       tracesSampleRate: 0.2,
-      profilesSampleRate: 0.1,
     });
 
     // Memory leak detection
@@ -15,9 +14,6 @@ export class MonitoringService {
 
     // Health checks
     this.initializeHealthChecks();
-
-    // Load balancing checks
-    this.monitorLoadBalancing();
   }
 
   static startMemoryMonitoring() {
@@ -34,67 +30,38 @@ export class MonitoringService {
       '/health': async () => {
         const checks = await Promise.all([
           this.checkDatabase(),
-          this.checkCache(),
           this.checkAPI(),
-          this.checkQueue()
+          this.checkCache()
         ]);
         return checks.every(check => check.status === 'healthy');
       }
     };
   }
 
-  static async monitorSmartContract(contractAddress) {
+  static async checkDatabase() {
     try {
-      // Monitor contract events
-      const contract = await this.getContract(contractAddress);
-      contract.on('Transfer', (from, to, value, event) => {
-        // Log transfer events
-        this.logContractEvent('Transfer', { from, to, value });
-      });
-
-      // Monitor gas prices
-      setInterval(async () => {
-        const gasPrice = await this.getGasPrice();
-        this.logMetric('gasPrice', gasPrice);
-      }, 300000); // Every 5 minutes
+      // Implement your database health check here
+      return { status: 'healthy' };
     } catch (error) {
-      Sentry.captureException(error);
+      return { status: 'unhealthy', error: error.message };
     }
   }
 
-  static async backupData() {
-    const { backupConfig } = securityConfig;
-    
+  static async checkAPI() {
     try {
-      // Database backup
-      await this.backupDatabase(backupConfig.database);
-      
-      // Smart contract state backup
-      await this.backupSmartContracts(backupConfig.smartContract);
-      
-      // Configuration backup
-      await this.backupConfigurations(backupConfig.config);
+      // Implement your API health check here
+      return { status: 'healthy' };
     } catch (error) {
-      Sentry.captureException(error);
+      return { status: 'unhealthy', error: error.message };
     }
   }
 
-  static async performSecurityAudit() {
-    const { smartContractAudit } = securityConfig;
-    
+  static async checkCache() {
     try {
-      // Audit smart contracts
-      const auditResults = await this.auditContracts(smartContractAudit.criticalFunctions);
-      
-      // Generate and store audit report
-      await this.generateAuditReport(auditResults);
-      
-      // Notify if issues found
-      if (auditResults.criticalIssues.length > 0) {
-        await this.notifySecurityTeam(auditResults);
-      }
+      // Implement your cache health check here
+      return { status: 'healthy' };
     } catch (error) {
-      Sentry.captureException(error);
+      return { status: 'unhealthy', error: error.message };
     }
   }
 }
