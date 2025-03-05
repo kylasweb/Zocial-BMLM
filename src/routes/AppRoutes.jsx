@@ -25,6 +25,7 @@ import FrontendManager from '../pages/admin/frontend/FrontendManager';
 import BalanceAdjustment from '../pages/admin/tools/BalanceAdjustment';
 import RankAdjustment from '../pages/admin/tools/RankAdjustment';
 import GamificationHub from '../pages/GamificationHub';
+import NotFound from '../pages/NotFound';
 
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user, isLoaded } = useUser();
@@ -160,6 +161,9 @@ export default function AppRoutes() {
           } />
         </Route>
       </Route>
+
+      {/* Add catch-all route at the end */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

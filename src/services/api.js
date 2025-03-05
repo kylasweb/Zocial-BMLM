@@ -9,27 +9,52 @@ const api = axios.create({
 });
 
 // Request interceptor
-api.interceptors.request.use((config) => {
-  const token = store.getState().auth.token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+  (config) => {
+    const token = store.getState().auth.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 // Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      store.dispatch(logout());
-      store.dispatch(
-        addNotification({
+    const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
+    
+    switch (error.response?.status) {
+      case 401:
+        store.dispatch(logout());
+        store.dispatch(addNotification({
           type: 'error',
           message: 'Session expired. Please login again.',
-        })
-      );
+        }));
+        break;
+      case 403:
+        store.dispatch(addNotification({
+          type: 'error',
+          message: 'You do not have permission to perform this action.',
+        }));
+        break;
+      case 429:
+        store.dispatch(addNotification({
+          type: 'warning',
+          message: 'Too many requests. Please try again later.',
+        }));
+        break;
+      default:
+        store.dispatch(addNotification({
+          type: 'error',
+          message: errorMessage,
+        }));
     }
+    
     return Promise.reject(error);
   }
 );
