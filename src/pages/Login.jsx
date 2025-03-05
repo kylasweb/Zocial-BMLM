@@ -1,14 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { SignIn, SignUp, useUser } from '@clerk/clerk-react';
-import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import { SignIn, useUser } from '@clerk/clerk-react';
 
 export default function Login() {
   const navigate = useNavigate();
   const { isSignedIn } = useUser();
 
-  // Redirect if already signed in
   if (isSignedIn) {
     navigate('/dashboard');
+    return null;
   }
 
   return (
@@ -24,32 +23,18 @@ export default function Login() {
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <SignedOut>
-            <div className="space-y-6">
-              <SignIn 
-                appearance={{
-                  variables: {
-                    colorPrimary: '#0ea5e9'
-                  }
-                }}
-                afterSignInUrl="/dashboard"
-              />
-              <div className="text-center text-gray-600">or</div>
-              <SignUp 
-                appearance={{
-                  variables: {
-                    colorPrimary: '#0ea5e9'
-                  }
-                }}
-                afterSignUpUrl="/onboarding"
-              />
-            </div>
-          </SignedOut>
-          <SignedIn>
-            <div className="text-center">
-              <p>Redirecting to dashboard...</p>
-            </div>
-          </SignedIn>
+          <SignIn 
+            routing="path" 
+            path="/login" 
+            signUpUrl="/register"
+            redirectUrl="/dashboard"
+            appearance={{
+              elements: {
+                formButtonPrimary: 'bg-primary-600 hover:bg-primary-700',
+                card: 'bg-white shadow-xl rounded-lg',
+              }
+            }}
+          />
         </div>
       </div>
     </div>

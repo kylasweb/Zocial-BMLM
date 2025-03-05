@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useUser } from '@clerk/clerk-react';
+import { ROLES } from '../config/roles';
 import Layout from '../components/layout/Layout';
 import PublicLayout from '../components/layout/PublicLayout';
 import Login from '../pages/Login';
@@ -10,7 +11,10 @@ import Network from '../pages/Network';
 import Profile from '../pages/Profile';
 import LandingPage from '../pages/public/LandingPage';
 import Plans from '../pages/public/Plans';
-import AdminDashboard from '../pages/admin/AdminDashboard';
+import GDPRPage from '../pages/public/GDPRPage';
+import AdminDashboard from '../pages/dashboard/AdminDashboard';
+import LeaderDashboard from '../pages/dashboard/LeaderDashboard';
+import UserDashboard from '../pages/dashboard/UserDashboard';
 import UserManagement from '../pages/admin/UserManagement';
 import RewardsManagement from '../pages/admin/RewardsManagement';
 import InvestmentPlans from '../pages/admin/InvestmentPlans';
@@ -23,9 +27,9 @@ import RankAdjustment from '../pages/admin/tools/RankAdjustment';
 import GamificationHub from '../pages/GamificationHub';
 
 const ProtectedRoute = ({ children, roles = [] }) => {
-  const { user, loading } = useAuth();
+  const { user, isLoaded } = useUser();
   
-  if (loading) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
@@ -37,17 +41,39 @@ const ProtectedRoute = ({ children, roles = [] }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (roles.length && !roles.includes(user.role)) {
+  if (roles.length && !roles.includes(user.publicMetadata?.role)) {
     return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 };
 
-export default function AppRoutes() {
-  const { user, loading } = useAuth();
+const PublicRoutes = () => {
+  return (
+    <PublicLayout>
+      <Outlet />
+    </PublicLayout>
+  );
+};
 
-  if (loading) {
+const DashboardRouter = () => {
+  const { user } = useUser();
+  const userRole = user?.publicMetadata?.role || ROLES.USER;
+
+  switch (userRole) {
+    case ROLES.ADMIN:
+      return <AdminDashboard />;
+    case ROLES.LEADER:
+      return <LeaderDashboard />;
+    default:
+      return <UserDashboard />;
+  }
+};
+
+export default function AppRoutes() {
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
@@ -58,16 +84,23 @@ export default function AppRoutes() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route element={<PublicLayout><Outlet /></PublicLayout>}>
+      <Route element={<PublicRoutes />}>
         <Route index element={<LandingPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="features" element={<FeaturesPage />} />
         <Route path="plans" element={<Plans />} />
+        <Route path="blog" element={<BlogPage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
+        <Route path="gdpr" element={<GDPRPage />} />
         <Route path="login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
         <Route path="register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
       </Route>
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="dashboard" element={<DashboardRouter />} />
         <Route path="network" element={<Network />} />
         <Route path="profile" element={<Profile />} />
         <Route path="gamification" element={<GamificationHub />} />

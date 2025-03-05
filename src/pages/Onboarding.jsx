@@ -1,12 +1,35 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { user, isLoaded } = useUser();
   const [answers, setAnswers] = useState({});
 
-  const handleComplete = () => {
-    navigate('/dashboard');
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
+
+  const handleComplete = async () => {
+    try {
+      // Update user metadata with onboarding answers
+      await user.update({
+        publicMetadata: {
+          ...user.publicMetadata,
+          onboardingCompleted: true,
+          ...answers
+        }
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+    }
   };
 
   return (
@@ -24,17 +47,13 @@ export default function Onboarding() {
         <div className="w-full max-w-md">
           <div className="bg-white p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-6">Profile Setup</h2>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleComplete();
-            }}>
-              <button
-                type="submit"
-                className="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 transition-colors"
-              >
-                Complete Setup
-              </button>
-            </form>
+            {/* Add your onboarding form fields here */}
+            <button 
+              onClick={handleComplete}
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Complete Setup
+            </button>
           </div>
         </div>
       </div>
