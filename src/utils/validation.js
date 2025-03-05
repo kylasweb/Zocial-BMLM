@@ -3,6 +3,11 @@ import * as yup from 'yup';
 export const investmentPlanSchema = yup.object().shape({
   name: yup.string().required('Plan name is required'),
   description: yup.string().required('Description is required'),
+  type: yup.string().oneOf(['BASIC', 'PREMIUM', 'VIP'], 'Invalid plan type'),
+  status: yup.string().oneOf(['ACTIVE', 'INACTIVE'], 'Invalid status'),
+  price: yup.number()
+    .required('Price is required')
+    .positive('Price must be positive'),
   minAmount: yup.number()
     .required('Minimum amount is required')
     .positive('Amount must be positive'),
@@ -16,6 +21,22 @@ export const investmentPlanSchema = yup.object().shape({
   roi: yup.number()
     .required('ROI is required')
     .min(0, 'ROI cannot be negative'),
+  commissions: yup.object().shape({
+    directReferral: yup.number().min(0).max(100),
+    matrixBonus: yup.number().min(0).max(100),
+    teamBonus: yup.number().min(0).max(100),
+    cycleBonus: yup.number().min(0).max(100)
+  }),
+  eligibility: yup.object().shape({
+    minRank: yup.string(),
+    minReferrals: yup.number().min(0)
+  }),
+  customLogic: yup.object().shape({
+    spilloverEnabled: yup.boolean(),
+    fastTrackEnabled: yup.boolean(),
+    autoBalanceEnabled: yup.boolean()
+  }),
+  features: yup.array().of(yup.string())
 });
 
 export const userProfileSchema = yup.object().shape({
