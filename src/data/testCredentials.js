@@ -1,5 +1,17 @@
 export const testUsers = [
   {
+    role: 'super_admin',
+    email: 'kailaspnair@yahoo.com',
+    password: '@Cargo123#',
+    name: 'Super Admin',
+    id: 'SUPER_ADMIN',
+    sponsorId: null,
+    joinDate: '2024-01-01',
+    earnings: 100000,
+    rank: 'CROWN_DIAMOND',
+    permissions: '*' // All permissions granted
+  },
+  {
     role: 'admin',
     email: 'admin@zocial.com',
     password: 'admin123',

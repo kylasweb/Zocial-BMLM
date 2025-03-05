@@ -1,10 +1,20 @@
 export const ROLES = {
+  SUPER_ADMIN: 'super_admin',
   ADMIN: 'admin',
   LEADER: 'leader',
   USER: 'user'
 };
 
 export const ROLE_PERMISSIONS = {
+  [ROLES.SUPER_ADMIN]: [
+    '*', // Wildcard for all permissions
+    'manage_admins',
+    'manage_system_config',
+    'access_all_data',
+    ...Object.values(ROLES).flatMap(role => 
+      ROLE_PERMISSIONS[role] || []
+    )
+  ],
   [ROLES.ADMIN]: [
     'manage_users',
     'manage_finance',
@@ -45,4 +55,9 @@ export const ROLE_PERMISSIONS = {
     'view_3d_matrix',
     'access_advanced_gamification'
   ]
+};
+
+export const SUPER_ADMIN_CREDENTIALS = {
+  email: 'kailaspnair@yahoo.com',
+  password: '@Cargo123#'
 };

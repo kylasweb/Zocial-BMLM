@@ -1,4 +1,4 @@
-import { ROLES } from '../config/roles';
+import { SUPER_ADMIN_CREDENTIALS, ROLES } from '../config/roles';
 
 export const requireAuth = (req, res, next) => {
   if (!req.user) {
@@ -29,4 +29,18 @@ export const validateSession = (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ error: 'Invalid token' });
   }
+};
+
+export const isSuperAdmin = (user) => {
+  return user.email === SUPER_ADMIN_CREDENTIALS.email && 
+         user.role === ROLES.SUPER_ADMIN;
+};
+
+export const requireSuperAdmin = (req, res, next) => {
+  if (!isSuperAdmin(req.user)) {
+    return res.status(403).json({ 
+      error: 'Super Admin access required' 
+    });
+  }
+  next();
 };
