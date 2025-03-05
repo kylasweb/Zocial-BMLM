@@ -3,7 +3,7 @@ import { FiSearch, FiUser, FiMenu } from 'react-icons/fi';
 import PublicFooter from './PublicFooter';
 import { useState } from 'react';
 
-export default function PublicLayout({ children }) {
+export default function PublicLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
@@ -105,7 +105,7 @@ export default function PublicLayout({ children }) {
 
       {/* Main Content */}
       <main className="flex-grow">
-        {children || <Outlet />}
+        <Outlet />
       </main>
 
       {/* Footer */}
