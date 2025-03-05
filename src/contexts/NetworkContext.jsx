@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { calculateCommissions } from '../utils/helpers';
+import { ethers } from 'ethers';
 
 const NetworkContext = createContext(null);
 
@@ -23,6 +24,38 @@ export const NetworkProvider = ({ children }) => {
     PLATINUM: { minTeam: 20, minEarnings: 2000 },
     DIAMOND: { minTeam: 50, minEarnings: 5000 }
   });
+
+  const [networkConfig, setNetworkConfig] = useState({
+    provider: null,
+    chainId: null,
+    contracts: {}
+  });
+
+  useEffect(() => {
+    initializeNetwork();
+  }, []);
+
+  const initializeNetwork = async () => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const network = await provider.getNetwork();
+      
+      setNetworkConfig({
+        provider,
+        chainId: network.chainId,
+        contracts: {
+          token: new ethers.Contract(
+            process.env.VITE_TOKEN_ADDRESS,
+            ['function balanceOf(address) view returns (uint256)'],
+            provider
+          ),
+          // Add other contract instances
+        }
+      });
+    } catch (error) {
+      console.error('Failed to initialize network:', error);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -118,11 +151,13 @@ export const NetworkProvider = ({ children }) => {
     network,
     stats,
     ranks,
+    networkConfig,
     getDownline,
     getExtremeLegs,
     calculateRank,
     distributeCommissions,
-    refreshNetwork: loadNetworkData
+    refreshNetwork: loadNetworkData,
+    initializeNetwork
   };
 
   return (

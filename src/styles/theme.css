@@ -1,0 +1,94 @@
+/* Theme Variables */
+:root {
+  /* Generated theme variables will be injected here */
+}
+
+/* Responsive Containers */
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: var(--spacing-md);
+  padding-left: var(--spacing-md);
+}
+
+/* Device-specific styles */
+@media (max-width: 768px) {
+  :root {
+    /* Mobile theme variables */
+    --color-primary: var(--mobile-color-primary);
+    --color-secondary: var(--mobile-color-secondary);
+    --spacing-sm: var(--mobile-spacing-sm);
+    --spacing-md: var(--mobile-spacing-md);
+    --spacing-lg: var(--mobile-spacing-lg);
+    --spacing-xl: var(--mobile-spacing-xl);
+  }
+
+  .container {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 769px) {
+  :root {
+    /* Desktop theme variables */
+    --color-primary: var(--desktop-color-primary);
+    --color-secondary: var(--desktop-color-secondary);
+    --spacing-sm: var(--desktop-spacing-sm);
+    --spacing-md: var(--desktop-spacing-md);
+    --spacing-lg: var(--desktop-spacing-lg);
+    --spacing-xl: var(--desktop-spacing-xl);
+  }
+
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Theme Utility Classes */
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.spacing-sm {
+  padding: var(--spacing-sm);
+  margin: var(--spacing-sm);
+}
+
+.spacing-md {
+  padding: var(--spacing-md);
+  margin: var(--spacing-md);
+}
+
+/* Animation Classes */
+.theme-transition {
+  transition: all 0.3s ease;
+}
+
+/* Device Preview Frames */
+.device-preview {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.device-preview.mobile {
+  width: 375px;
+  height: 667px;
+}
+
+.device-preview.tablet {
+  width: 768px;
+  height: 1024px;
+}
+
+.device-preview.desktop {
+  width: 100%;
+  max-width: 1280px;
+  height: 800px;
+}
