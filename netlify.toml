@@ -23,6 +23,9 @@
 [[plugins]]
   package = "netlify-plugin-checklinks"
 
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+
 [[headers]]
   for = "/*"
   [headers.values]

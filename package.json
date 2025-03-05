@@ -29,7 +29,10 @@
     "test:unit": "vitest run",
     "test:integration": "vitest integration",
     "test:e2e": "cypress run",
-    "performance:analyze": "node scripts/performance/analyze.js"
+    "performance:analyze": "node scripts/performance/analyze.js",
+    "predeploy": "node scripts/pre-deploy.js",
+    "deploy:staging": "npm run predeploy && node scripts/deploy.js staging",
+    "deploy:prod": "npm run predeploy && node scripts/deploy.js production"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
