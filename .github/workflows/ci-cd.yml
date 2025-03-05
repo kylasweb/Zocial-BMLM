@@ -22,13 +22,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
+      - name: Run ESLint with report
         run: |
-          npm run lint || (echo "Linting failed. Please fix the issues above." && exit 1)
-        continue-on-error: false
+          npm run lint:report || true
+          if [ -f lint-report.json ]; then
+            echo "Lint issues found:"
+            cat lint-report.json
+            echo "Running detailed lint check..."
+            npm run lint
+          fi
 
       - name: Run tests
         run: npm test
+
+      - name: Upload lint report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-report
+          path: lint-report.json
 
   build:
     needs: lint-and-test
