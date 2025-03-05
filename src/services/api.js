@@ -92,6 +92,33 @@ export const apiService = {
   getTickets: () => api.get('/support/tickets'),
   updateTicket: (ticketId, update) => 
     api.put(`/support/tickets/${ticketId}`, update),
+
+  // Faucet Operations
+  getFaucetConfig: (tokenId) => api.get(`/tokens/${tokenId}/faucet/config`),
+  updateFaucetConfig: (tokenId, config) => api.put(`/tokens/${tokenId}/faucet/config`, config),
+  getFaucetHistory: (tokenId) => api.get(`/tokens/${tokenId}/faucet/history`),
+  getFaucetStats: (tokenId) => api.get(`/tokens/${tokenId}/faucet/stats`),
+  processFaucetClaim: (tokenId, userId) => api.post(`/tokens/${tokenId}/faucet/claim`, { userId }),
+
+  // Airdrop Management
+  getActiveAirdrops: (tokenId) => api.get(`/tokens/${tokenId}/airdrops/active`),
+  getAirdropHistory: (tokenId) => api.get(`/tokens/${tokenId}/airdrops/history`),
+  getAirdropStats: (tokenId) => api.get(`/tokens/${tokenId}/airdrops/stats`),
+  createAirdrop: (tokenId, airdropData) => api.post(`/tokens/${tokenId}/airdrops`, airdropData),
+  executeAirdrop: (tokenId, airdropId) => api.post(`/tokens/${tokenId}/airdrops/${airdropId}/execute`),
+
+  // Reward System
+  getRewardConfig: (tokenId) => api.get(`/tokens/${tokenId}/rewards/config`),
+  updateRewardConfig: (tokenId, path, value) => api.put(`/tokens/${tokenId}/rewards/config`, { path, value }),
+  getRewardHistory: (tokenId) => api.get(`/tokens/${tokenId}/rewards/history`),
+  getRewardStats: (tokenId) => api.get(`/tokens/${tokenId}/rewards/stats`),
+  calculateRewardDistribution: (tokenId, rewardType, recipients) => 
+    api.post(`/tokens/${tokenId}/rewards/calculate`, { rewardType, recipients }),
+
+  // Achievement Tracking
+  getUserAchievements: (userId) => api.get(`/users/${userId}/achievements`),
+  trackAchievement: (userId, achievementData) => api.post(`/users/${userId}/achievements`, achievementData),
+  getAchievementStats: () => api.get('/achievements/stats')
 };
 
 export default apiService;

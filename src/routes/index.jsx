@@ -1,9 +1,12 @@
 import { lazy } from 'react';
 import { lazyLoadComponent } from '../utils/lazyLoad';
 
-// Lazy load pages
+// Public pages
 const LandingPage = lazyLoadComponent(() => import('../pages/public/LandingPage'));
 const Login = lazyLoadComponent(() => import('../pages/auth/Login'));
+
+// Admin pages
+const AdminLayout = lazyLoadComponent(() => import('../layouts/AdminLayout'));
 const Dashboard = lazyLoadComponent(() => import('../pages/admin/Dashboard'));
 const UserManagement = lazyLoadComponent(() => import('../pages/admin/UserManagement'));
 const Settings = lazyLoadComponent(() => import('../pages/admin/Settings'));
@@ -22,8 +25,13 @@ export const routes = [
   },
   {
     path: '/admin',
-    element: <Dashboard />,
-    roles: ['ADMIN']
-  },
-  // ... other routes
+    element: <AdminLayout />,
+    roles: ['ADMIN'],
+    children: [
+      { path: '', element: <Dashboard /> },
+      { path: 'users', element: <UserManagement /> },
+      { path: 'settings', element: <Settings /> },
+      { path: 'environment', element: <EnvironmentManager /> }
+    ]
+  }
 ];

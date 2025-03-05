@@ -1,18 +1,19 @@
-import { Suspense } from 'react';
 import { lazyLoadComponent } from '../../../utils/lazyLoad';
 
-const Stats = lazyLoadComponent(() => import('./sections/Stats'));
-const RecentActivity = lazyLoadComponent(() => import('./sections/RecentActivity'));
-const Charts = lazyLoadComponent(() => import('./sections/Charts'));
-const QuickActions = lazyLoadComponent(() => import('./sections/QuickActions'));
+const DashboardHeader = lazyLoadComponent(() => import('./components/DashboardHeader'));
+const StatCards = lazyLoadComponent(() => import('./components/StatCards'));
+const ActivityFeed = lazyLoadComponent(() => import('./components/ActivityFeed'));
+const AnalyticsCharts = lazyLoadComponent(() => import('./components/AnalyticsCharts'));
+const QuickActions = lazyLoadComponent(() => import('./components/QuickActions'));
 
-export default function AdminDashboard() {
+export default function Dashboard() {
   return (
-    <div className="grid gap-6 p-6">
-      <Stats />
+    <div className="p-6 space-y-6">
+      <DashboardHeader />
+      <StatCards />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentActivity />
-        <Charts />
+        <ActivityFeed />
+        <AnalyticsCharts />
       </div>
       <QuickActions />
     </div>

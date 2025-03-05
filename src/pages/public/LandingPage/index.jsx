@@ -1,6 +1,7 @@
-import { Suspense } from 'react';
+import { lazy } from 'react';
 import { lazyLoadComponent } from '../../../utils/lazyLoad';
 
+// Lazy load sections
 const Hero = lazyLoadComponent(() => import('./sections/Hero'));
 const Features = lazyLoadComponent(() => import('./sections/Features'));
 const Pricing = lazyLoadComponent(() => import('./sections/Pricing'));
