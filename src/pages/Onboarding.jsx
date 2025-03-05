@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OnBoarding } from '@questlabs/react-sdk';
-import questConfig from '../questConfig';
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
-  const userId = localStorage.getItem('userId');
-  const token = localStorage.getItem('token');
 
-  const getAnswers = () => {
+  const handleComplete = () => {
     navigate('/dashboard');
   };
 
@@ -26,21 +22,20 @@ export default function Onboarding() {
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <OnBoarding
-            userId={userId}
-            token={token}
-            questId={questConfig.QUEST_ONBOARDING_QUESTID}
-            answer={answers}
-            setAnswer={setAnswers}
-            getAnswers={getAnswers}
-            accent={questConfig.PRIMARY_COLOR}
-            singleChoose="modal1"
-            multiChoice="modal2"
-          >
-            <OnBoarding.Header />
-            <OnBoarding.Content />
-            <OnBoarding.Footer />
-          </OnBoarding>
+          <div className="bg-white p-8 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6">Profile Setup</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleComplete();
+            }}>
+              <button
+                type="submit"
+                className="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 transition-colors"
+              >
+                Complete Setup
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

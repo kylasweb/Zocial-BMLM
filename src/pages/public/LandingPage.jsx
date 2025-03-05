@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export default function LandingPage() {
+  console.log('LandingPage rendering');
   const [content, setContent] = useState({
     hero: {
       title: 'Welcome to Zocial Ecosystem',

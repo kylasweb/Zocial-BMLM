@@ -1,20 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { QuestLogin } from '@questlabs/react-sdk';
-import questConfig from '../questConfig';
+import { SignIn, SignUp, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { isSignedIn } = useUser();
 
-  const handleLogin = ({ userId, token, newUser }) => {
-    localStorage.setItem('userId', userId);
-    localStorage.setItem('token', token);
-    
-    if (newUser) {
-      navigate('/onboarding');
-    } else {
-      navigate('/dashboard');
-    }
-  };
+  // Redirect if already signed in
+  if (isSignedIn) {
+    navigate('/dashboard');
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -29,12 +24,32 @@ export default function Login() {
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <QuestLogin 
-            onSubmit={handleLogin}
-            email={true}
-            google={false}
-            accent={questConfig.PRIMARY_COLOR}
-          />
+          <SignedOut>
+            <div className="space-y-6">
+              <SignIn 
+                appearance={{
+                  variables: {
+                    colorPrimary: '#0ea5e9'
+                  }
+                }}
+                afterSignInUrl="/dashboard"
+              />
+              <div className="text-center text-gray-600">or</div>
+              <SignUp 
+                appearance={{
+                  variables: {
+                    colorPrimary: '#0ea5e9'
+                  }
+                }}
+                afterSignUpUrl="/onboarding"
+              />
+            </div>
+          </SignedOut>
+          <SignedIn>
+            <div className="text-center">
+              <p>Redirecting to dashboard...</p>
+            </div>
+          </SignedIn>
         </div>
       </div>
     </div>
