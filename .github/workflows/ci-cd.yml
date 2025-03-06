@@ -56,8 +56,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies and Netlify plugins
+        run: |
+          npm ci
+          npm install -D @netlify/plugin-lighthouse netlify-plugin-cache netlify-plugin-submit-sitemap netlify-plugin-checklinks
       
       - name: Build
         run: |

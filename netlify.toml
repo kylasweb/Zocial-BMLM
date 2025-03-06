@@ -4,9 +4,6 @@
   functions = "netlify/functions"
 
 [[plugins]]
-  package = "@netlify/plugin-mongodb"
-
-[[plugins]]
   package = "netlify-plugin-cache"
   [plugins.inputs]
     paths = [
