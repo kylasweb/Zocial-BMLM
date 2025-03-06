@@ -17,8 +17,7 @@
 [[plugins]]
   package = "netlify-plugin-submit-sitemap"
 
-[[plugins]]
-  package = "@netlify/plugin-lighthouse"
+# Temporarily remove Lighthouse plugin until it supports Node.js 20
 
 [[headers]]
   for = "/*"
