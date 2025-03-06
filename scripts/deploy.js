@@ -1,5 +1,6 @@
 const { execSync } = require('child_process');
 const dotenv = require('dotenv');
+const fetch = require('node-fetch');
 
 // Load environment variables
 dotenv.config();
@@ -11,48 +12,44 @@ const config = {
   production: {
     branch: 'main',
     buildCommand: 'npm run build',
-    environment: {
-      NODE_ENV: 'production',
-      VITE_API_URL: process.env.PROD_API_URL,
-      VITE_CLERK_PUBLISHABLE_KEY: process.env.PROD_CLERK_KEY,
-      VITE_WEB3_NETWORK: process.env.PROD_WEB3_NETWORK
-    }
   },
   staging: {
     branch: 'staging',
     buildCommand: 'npm run build:staging',
-    environment: {
-      NODE_ENV: 'staging',
-      VITE_API_URL: process.env.STAGING_API_URL,
-      VITE_CLERK_PUBLISHABLE_KEY: process.env.STAGING_CLERK_KEY,
-      VITE_WEB3_NETWORK: process.env.STAGING_WEB3_NETWORK
-    }
   }
 };
 
-const stagingConfig = {
-  VITE_API_URL: "https://staging-api.yourapp.com",
-  VITE_CLERK_PUBLISHABLE_KEY: "pk_test_c291bmQtaGlwcG8tMzguY2xlcmsuYWNjb3VudHMuZGV2JA",
-  VITE_WEB3_NETWORK: "testnet",
-  NODE_ENV: "staging",
-  CORS_ORIGIN: "https://staging.yourapp.com"
-};
+// Fetch environment variables from admin dashboard
+async function fetchEnvironmentVariables(environment) {
+  try {
+    const response = await fetch(`${process.env.VITE_API_URL}/admin/environment/${environment}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.ADMIN_API_TOKEN}`,
+      }
+    });
 
-const productionConfig = {
-  VITE_API_URL: "https://api.yourapp.com",
-  VITE_CLERK_PUBLISHABLE_KEY: "pk_live_your_prod_clerk_key",
-  VITE_WEB3_NETWORK: "mainnet",
-  NODE_ENV: "production",
-  CORS_ORIGIN: "https://yourapp.com"
-};
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${environment} environment variables`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching environment variables:', error);
+    throw error;
+  }
+}
 
 // Deploy function
 async function deploy() {
   try {
     const deployConfig = config[deployEnvironment];
     
-    // Set environment variables
-    Object.entries(deployConfig.environment).forEach(([key, value]) => {
+    // Fetch environment-specific variables
+    console.log(`Fetching ${deployEnvironment} environment variables...`);
+    const envVars = await fetchEnvironmentVariables(deployEnvironment);
+    
+    // Set environment variables for the build
+    Object.entries(envVars).forEach(([key, value]) => {
       process.env[key] = value;
     });
 
@@ -60,12 +57,21 @@ async function deploy() {
     console.log(`Building for ${deployEnvironment}...`);
     execSync(deployConfig.buildCommand, { stdio: 'inherit' });
 
-    // Deploy to Netlify
+    // Deploy to Netlify with environment variables
     console.log(`Deploying to ${deployEnvironment}...`);
-    execSync(`netlify deploy ${deployEnvironment === 'production' ? '--prod' : ''}`, {
-      stdio: 'inherit'
+    const deployCommand = [
+      'netlify deploy',
+      deployEnvironment === 'production' ? '--prod' : '',
+      '--json'
+    ].filter(Boolean).join(' ');
+
+    const result = execSync(deployCommand, {
+      stdio: 'pipe',
+      encoding: 'utf-8'
     });
 
+    const deployResult = JSON.parse(result);
+    console.log('Deployment URL:', deployResult.url);
     console.log('Deployment completed successfully!');
   } catch (error) {
     console.error('Deployment failed:', error);
@@ -73,4 +79,5 @@ async function deploy() {
   }
 }
 
+// Run deployment
 deploy();

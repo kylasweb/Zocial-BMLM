@@ -60,9 +60,13 @@ jobs:
         run: npm ci
       
       - name: Build
-        run: npm run build
+        run: |
+          # Fetch environment variables from admin dashboard
+          node scripts/fetch-env.js ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          npm run build
         env:
-          NODE_ENV: production
+          ADMIN_API_TOKEN: ${{ secrets.ADMIN_API_TOKEN }}
+          NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

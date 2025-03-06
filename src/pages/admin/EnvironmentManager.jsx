@@ -3,19 +3,75 @@ import { motion } from 'framer-motion';
 import { FiSettings, FiEdit2, FiTrash2, FiEye, FiEyeOff, FiSave, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
+const defaultEnvironmentVariables = [
+  { key: 'NODE_VERSION', value: '20', isSecret: false },
+  { key: 'NODE_ENV', value: 'production', isSecret: false },
+  { key: 'VITE_API_URL', value: '', isSecret: false },
+  { key: 'REACT_APP_API_URL', value: '', isSecret: false },
+  { key: 'VITE_CLERK_PUBLISHABLE_KEY', value: '', isSecret: true },
+  { key: 'CLERK_SECRET_KEY', value: '', isSecret: true },
+  { key: 'SENTRY_DSN', value: '', isSecret: true },
+  { key: 'VITE_WEB3_NETWORK', value: 'mainnet', isSecret: false },
+  { key: 'VITE_TOKEN_DISTRIBUTOR_ADDRESS', value: '', isSecret: false },
+  { key: 'NETLIFY_AUTH_TOKEN', value: '', isSecret: true },
+  { key: 'NETLIFY_SITE_ID', value: '', isSecret: true },
+  { key: 'CORS_ORIGIN', value: '', isSecret: false },
+  { key: 'MONGODB_URI', value: '', isSecret: true }
+];
+
 export default function EnvironmentManager() {
   const [variables, setVariables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSecrets, setShowSecrets] = useState({});
   const [newVariable, setNewVariable] = useState({ key: '', value: '', isSecret: false });
-  
+  const [environment, setEnvironment] = useState('production');
+
   useEffect(() => {
     fetchEnvironmentVariables();
-  }, []);
+  }, [environment]);
+
+  const initializeDefaultVariables = async () => {
+    try {
+      const existingVars = await fetchEnvironmentVariables();
+      const missingVars = defaultEnvironmentVariables.filter(
+        defaultVar => !existingVars.some(existing => existing.key === defaultVar.key)
+      );
+
+      if (missingVars.length > 0) {
+        for (const variable of missingVars) {
+          await handleAddVariable(variable);
+        }
+        await fetchEnvironmentVariables();
+      }
+    } catch (error) {
+      toast.error('Failed to initialize default variables');
+    }
+  };
+
+  const handleEnvironmentChange = async (newEnvironment) => {
+    setEnvironment(newEnvironment);
+    await fetchEnvironmentVariables();
+  };
+
+  const validateVariable = (variable) => {
+    const validations = {
+      NODE_VERSION: (value) => /^\d+$/.test(value),
+      NODE_ENV: (value) => ['development', 'production', 'staging'].includes(value),
+      VITE_API_URL: (value) => /^https?:\/\/.+/.test(value),
+      VITE_WEB3_NETWORK: (value) => ['mainnet', 'testnet'].includes(value),
+      MONGODB_URI: (value) => value.startsWith('mongodb'),
+      VITE_TOKEN_DISTRIBUTOR_ADDRESS: (value) => /^0x[a-fA-F0-9]{40}$/.test(value)
+    };
+
+    const validator = validations[variable.key];
+    if (validator && !validator(variable.value)) {
+      throw new Error(`Invalid value for ${variable.key}`);
+    }
+  };
 
   const fetchEnvironmentVariables = async () => {
     try {
-      const response = await fetch('/api/admin/environment');
+      const response = await fetch(`/api/admin/environment?environment=${environment}`);
       const data = await response.json();
       setVariables(data);
       setLoading(false);
@@ -25,21 +81,23 @@ export default function EnvironmentManager() {
     }
   };
 
-  const handleAddVariable = async () => {
+  const handleAddVariable = async (variable = newVariable) => {
     try {
+      validateVariable(variable);
+      
       const response = await fetch('/api/admin/environment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newVariable)
+        body: JSON.stringify({ ...variable, environment })
       });
 
       if (!response.ok) throw new Error('Failed to add variable');
 
       toast.success('Environment variable added successfully');
-      fetchEnvironmentVariables();
+      await fetchEnvironmentVariables();
       setNewVariable({ key: '', value: '', isSecret: false });
     } catch (error) {
-      toast.error('Failed to add environment variable');
+      toast.error(error.message || 'Failed to add environment variable');
     }
   };
 
@@ -93,11 +151,20 @@ export default function EnvironmentManager() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Environment Variables</h2>
         <div className="flex items-center space-x-4">
-          <button
-            onClick={() => fetchEnvironmentVariables()}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          <select
+            value={environment}
+            onChange={(e) => handleEnvironmentChange(e.target.value)}
+            className="border rounded-lg px-4 py-2"
           >
-            Refresh
+            <option value="production">Production</option>
+            <option value="staging">Staging</option>
+            <option value="development">Development</option>
+          </select>
+          <button
+            onClick={initializeDefaultVariables}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Initialize Default Variables
           </button>
         </div>
       </div>

@@ -3,38 +3,6 @@
   publish = "dist"
   functions = "netlify/functions"
 
-[build.environment]
-# Base Configuration
-NODE_VERSION = "20"
-NODE_ENV = "production"
-
-# The following variables should be set in Netlify's UI:
-
-# API Configuration
-VITE_API_URL = "https://api.yourapp.com"
-REACT_APP_API_URL = "https://api.yourapp.com"
-
-# Authentication
-VITE_CLERK_PUBLISHABLE_KEY = "pk_test_c291bmQtaGlwcG8tMzguY2xlcmsuYWNjb3VudHMuZGV2JA"
-CLERK_SECRET_KEY = "sk_test_6KywXNhtgdUbLuYNUIPDaur9huGAoe6FPENaUlEZBW"
-
-# Monitoring
-SENTRY_DSN = "https://your-sentry-dsn.ingest.sentry.io/"
-
-# Web3 Configuration
-VITE_WEB3_NETWORK = "mainnet"
-VITE_TOKEN_DISTRIBUTOR_ADDRESS = "0x..."
-
-# Netlify Specific
-NETLIFY_AUTH_TOKEN = "your_netlify_auth_token"
-NETLIFY_SITE_ID = "your_netlify_site_id"
-
-# Security & CORS
-CORS_ORIGIN = "https://your-production-domain.com"
-
-# Database Configuration
-MONGODB_URI = "mongodb+srv://..."
-
 [[plugins]]
   package = "@netlify/plugin-mongodb"
 
@@ -59,13 +27,7 @@ MONGODB_URI = "mongodb+srv://..."
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.dev; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.clerk.dev https://*.ethereum.network wss://*.ethereum.network;"
     X-XSS-Protection = "1; mode=block"
-    Cache-Control = "public, max-age=31536000"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
 
 [[headers]]
   for = "/*.js"
