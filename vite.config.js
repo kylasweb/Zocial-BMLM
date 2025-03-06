@@ -52,6 +52,9 @@ export default defineConfig({
             if (id.includes('ethers')) {
               return 'web3';
             }
+            if (id.includes('framer-motion')) {
+              return 'animations';
+            }
             return 'vendor';
           }
         }
@@ -64,7 +67,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['ethers', 'react-toastify'],
+    include: [
+      'ethers', 
+      'react-toastify',
+      'framer-motion'
+    ],
     exclude: [
       '@clerk/clerk-react',
       '@clerk/shared',
