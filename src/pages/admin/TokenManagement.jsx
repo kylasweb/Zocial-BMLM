@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FiCodesandbox, FiPlus, FiEdit2, FiTrash2, FiShield, FiLock, FiRefreshCw } from 'react-icons/fi';
 import { nanoid } from 'nanoid';
 import { ethers } from 'ethers';
-import { toast } from 'react-toastify';
+import { Toaster } from '@components/ui/Toaster';
 
 export default function TokenManagement() {
   const [tokens, setTokens] = useState([]);

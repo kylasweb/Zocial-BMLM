@@ -40,7 +40,7 @@ export default defineConfig({
             if (id.includes('@clerk/clerk-react')) {
               return 'clerk';
             }
-            if (id.includes('@radix-ui/react-')) {
+            if (id.includes('@radix-ui/react-') || id.includes('react-toastify')) {
               return 'ui-libs';
             }
             if (id.includes('recharts')) {
@@ -64,7 +64,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['ethers'],
+    include: ['ethers', 'react-toastify'],
     exclude: [
       '@clerk/clerk-react',
       '@clerk/shared',
