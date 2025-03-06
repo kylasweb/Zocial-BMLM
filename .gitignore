@@ -1,7 +1,8 @@
 # Dependencies
 node_modules
-node_modules/
-/.pnp
+**/node_modules
+**/node_modules/**
+.pnp
 .pnp.js
 
 # Testing
@@ -65,3 +66,6 @@ lint-report.json
 
 # Yarn Integrity file
 .yarn-integrity
+
+# Local Netlify folder
+.netlify

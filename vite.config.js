@@ -25,57 +25,27 @@ export default defineConfig({
   build: {
     rollupOptions: {
       external: [
-        '@clerk/themes',
+        '@clerk/clerk-react',
         '@clerk/shared',
-        '@clerk/shared/loadClerkJsScript',
-        '@clerk/shared/object',
-        /^@clerk\/shared\/.*/
-      ],
-      output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react/') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@clerk/clerk-react')) {
-              return 'clerk';
-            }
-            if (id.includes('@radix-ui/react-') || id.includes('react-toastify')) {
-              return 'ui-libs';
-            }
-            if (id.includes('recharts')) {
-              return 'charts';
-            }
-            if (id.includes('monaco-editor') || id.includes('codemirror')) {
-              return 'editors';
-            }
-            if (id.includes('ethers')) {
-              return 'web3';
-            }
-            if (id.includes('framer-motion')) {
-              return 'animations';
-            }
-            return 'vendor';
-          }
-        }
-      },
-    },
-    chunkSizeWarningLimit: 1000,
-    commonjsOptions: {
-      include: [/node_modules/],
-      transformMixedEsModules: true,
-    },
+        '@clerk/types'
+      ]
+    }
   },
   optimizeDeps: {
     include: [
-      'ethers', 
       'react-toastify',
       'framer-motion'
     ],
     exclude: [
       '@clerk/clerk-react',
       '@clerk/shared',
-      '@clerk/themes'
+      '@clerk/types'
     ]
   },
+  server: {
+    fs: {
+      // Allow serving files from one level up from the package root
+      allow: ['..']
+    }
+  }
 });

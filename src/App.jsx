@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
-import { dark } from '@clerk/themes';
 import { AuthProvider } from './contexts/AuthContext';
 import { NetworkProvider } from './contexts/NetworkContext';
 import { FeatureProvider } from './contexts/FeatureContext';
@@ -35,7 +34,15 @@ function App() {
         <ClerkProvider 
           publishableKey={clerkPubKey}
           appearance={{
-            baseTheme: dark,
+            baseTheme: "dark",
+            variables: {
+              colorPrimary: 'rgb(14, 165, 233)',
+              colorBackground: 'rgb(17, 24, 39)',
+              colorText: 'rgb(255, 255, 255)',
+              colorInputText: 'rgb(255, 255, 255)',
+              colorInputBackground: 'rgb(31, 41, 55)',
+              colorDanger: 'rgb(239, 68, 68)',
+            },
             elements: {
               formButtonPrimary: 'bg-primary-600 hover:bg-primary-700',
               card: 'bg-white dark:bg-gray-800',
