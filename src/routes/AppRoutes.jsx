@@ -1,19 +1,19 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import LoadingSpinner from '../components/LoadingSpinner';
+import LoadingSpinner from '@components/LoadingSpinner';
 
-// Lazy load components
-const LandingPage = lazy(() => import('../pages/LandingPage'));
-const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
-const UserManagement = lazy(() => import('../pages/admin/UserManagement'));
-const InvestmentPlans = lazy(() => import('../pages/admin/InvestmentPlans'));
-const TaskManagement = lazy(() => import('../pages/admin/TaskManagement'));
-const PoolManagement = lazy(() => import('../pages/admin/PoolManagement'));
-const TokenManagement = lazy(() => import('../pages/admin/TokenManagement'));
-const FrontendManager = lazy(() => import('../pages/admin/frontend/FrontendManager'));
-const BalanceAdjustment = lazy(() => import('../pages/admin/tools/BalanceAdjustment'));
-const RankAdjustment = lazy(() => import('../pages/admin/tools/RankAdjustment'));
+// Lazy load components using aliases
+const LandingPage = lazy(() => import('@public/LandingPage'));
+const AdminDashboard = lazy(() => import('@admin/AdminDashboard'));
+const UserManagement = lazy(() => import('@admin/UserManagement'));
+const InvestmentPlans = lazy(() => import('@admin/InvestmentPlans'));
+const TaskManagement = lazy(() => import('@admin/TaskManagement'));
+const PoolManagement = lazy(() => import('@admin/PoolManagement'));
+const TokenManagement = lazy(() => import('@admin/TokenManagement'));
+const FrontendManager = lazy(() => import('@admin/frontend/FrontendManager'));
+const BalanceAdjustment = lazy(() => import('@admin/tools/BalanceAdjustment'));
+const RankAdjustment = lazy(() => import('@admin/tools/RankAdjustment'));
 const GamificationHub = lazy(() => import('../pages/GamificationHub'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 

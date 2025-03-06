@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
+    "ethers": "^6.11.1",
     "@codemirror/basic-setup": "^0.20.0",
     "@codemirror/lang-javascript": "^6.2.3",
     "@dnd-kit/core": "^6.3.1",
