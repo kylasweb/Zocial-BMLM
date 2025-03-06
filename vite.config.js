@@ -15,6 +15,7 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
+      external: ['@clerk/themes'],
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],

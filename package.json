@@ -48,7 +48,7 @@
     "@mui/material": "^5.16.14",
     "@reduxjs/toolkit": "^2.6.0",
     "@sentry/node": "^9.4.0",
-    "@sentry/react": "^7.120.3",
+    "@sentry/react": "^9.4.0",
     "@sentry/tracing": "^7.120.3",
     "@tanstack/react-query": "^5.67.1",
     "@types/recharts": "^1.8.29",
@@ -57,9 +57,10 @@
     "codemirror": "^6.0.1",
     "crypto-js": "^4.1.1",
     "date-fns": "4.1.0",
+    "dompurify": "^3.2.4",
     "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
-    "evergreen-ui": "^6.0.0",
+    "evergreen-ui": "^7.1.9",
     "express-mongo-sanitize": "^2.2.0",
     "framer-motion": "^11.18.2",
     "grommet": "^2.0.0",
@@ -73,7 +74,7 @@
     "netlify-plugin-submit-sitemap": "^0.4.0",
     "react": "^18.3.1",
     "react-ace": "^14.0.1",
-    "react-admin": "^4.0.0",
+    "react-admin": "^5.6.2",
     "react-beautiful-dnd": "^13.1.1",
     "react-color": "^2.19.3",
     "react-colorful": "^5.6.1",
@@ -92,7 +93,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
-    "@netlify/plugin-lighthouse": "^6.0.1",
+    "@netlify/plugin-lighthouse": "^5.0.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.1",
@@ -105,10 +106,10 @@
     "postcss": "^8.4.49",
     "rollup-plugin-visualizer": "^5.12.0",
     "tailwindcss": "^3.4.17",
-    "vite": "^5.4.2"
+    "vite": "^6.2.0"
   },
   "engines": {
-    "node": "18.x",
+    "node": ">=20.0.0",
     "npm": ">=8.0.0"
   },
   "browserslist": {
